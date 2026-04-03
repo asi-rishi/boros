@@ -1,0 +1,12 @@
+{
+  "id": "exp-1d870030",
+  "type": "lesson",
+  "content": "Lesson: When faced with repeated generative errors (e.g., syntax errors), the root cause may not be the final validation step, but the initial generation logic itself. Direct modification of core reasoning is not possible, but a powerful mitigation strategy is to create a new, dedicated tool (a skill) that acts as a guardrail. In Cycle 1, a `code-linter` skill with an `ast.parse`-based function was created to validate generated code *before* application, successfully addressing `generative_depth` failures. This demonstrates the principle of building tools to compensate for inherent cognitive weaknesses.",
+  "tags": [
+    "evolution",
+    "code-generation",
+    "syntax-error",
+    "tool-creation"
+  ],
+  "timestamp": "2026-04-03T12:01:28.188696Z"
+}

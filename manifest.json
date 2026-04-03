@@ -73,12 +73,17 @@
       "path": "skills/mode-controller",
       "type": "boot",
       "dependencies": [],
-      "provided_functions": ["mode_get", "mode_set"]
+      "provided_functions": [
+        "mode_get",
+        "mode_set"
+      ]
     },
     "temporal-consciousness": {
       "path": "skills/temporal-consciousness",
       "type": "boot",
-      "dependencies": ["mode-controller"],
+      "dependencies": [
+        "mode-controller"
+      ],
       "provided_functions": [
         "time_now",
         "time_elapsed_since",
@@ -89,13 +94,21 @@
     "identity": {
       "path": "skills/identity",
       "type": "boot",
-      "dependencies": ["mode-controller"],
-      "provided_functions": ["identity_read", "identity_update"]
+      "dependencies": [
+        "mode-controller"
+      ],
+      "provided_functions": [
+        "identity_read",
+        "identity_update"
+      ]
     },
     "memory": {
       "path": "skills/memory",
       "type": "boot",
-      "dependencies": ["mode-controller", "identity"],
+      "dependencies": [
+        "mode-controller",
+        "identity"
+      ],
       "provided_functions": [
         "memory_page_in",
         "memory_page_out",
@@ -106,7 +119,9 @@
     "skill-router": {
       "path": "skills/skill-router",
       "type": "boot",
-      "dependencies": ["mode-controller"],
+      "dependencies": [
+        "mode-controller"
+      ],
       "provided_functions": [
         "router_get_tools",
         "router_get_budget",
@@ -116,13 +131,23 @@
     "context-orchestration": {
       "path": "skills/context-orchestration",
       "type": "boot",
-      "dependencies": ["mode-controller", "identity", "memory"],
-      "provided_functions": ["context_load", "context_get_manifest"]
+      "dependencies": [
+        "mode-controller",
+        "identity",
+        "memory"
+      ],
+      "provided_functions": [
+        "context_load",
+        "context_get_manifest"
+      ]
     },
     "reflection": {
       "path": "skills/reflection",
       "type": "boot",
-      "dependencies": ["mode-controller", "memory"],
+      "dependencies": [
+        "mode-controller",
+        "memory"
+      ],
       "provided_functions": [
         "reflection_analyze_trace",
         "reflection_write_hypothesis",
@@ -132,7 +157,11 @@
     "meta-evolution": {
       "path": "skills/meta-evolution",
       "type": "boot",
-      "dependencies": ["mode-controller", "memory", "reflection"],
+      "dependencies": [
+        "mode-controller",
+        "memory",
+        "reflection"
+      ],
       "provided_functions": [
         "evolve_orient",
         "evolve_set_target",
@@ -147,7 +176,10 @@
     "meta-evaluation": {
       "path": "skills/meta-evaluation",
       "type": "boot",
-      "dependencies": ["mode-controller", "memory"],
+      "dependencies": [
+        "mode-controller",
+        "memory"
+      ],
       "provided_functions": [
         "review_proposal",
         "review_modify",
@@ -158,7 +190,9 @@
     "loop-orchestrator": {
       "path": "skills/loop-orchestrator",
       "type": "boot",
-      "dependencies": ["mode-controller"],
+      "dependencies": [
+        "mode-controller"
+      ],
       "provided_functions": [
         "loop_start",
         "loop_advance_stage",
@@ -184,7 +218,11 @@
       "path": "skills/mission-control",
       "type": "demand",
       "dependencies": [],
-      "provided_functions": ["mission_read", "mission_queue_task", "mission_update_status"]
+      "provided_functions": [
+        "mission_read",
+        "mission_queue_task",
+        "mission_update_status"
+      ]
     },
     "reasoning": {
       "path": "skills/reasoning",
@@ -200,7 +238,11 @@
       "path": "skills/scratchpad",
       "type": "demand",
       "dependencies": [],
-      "provided_functions": ["scratchpad_write", "scratchpad_read", "scratchpad_clear"]
+      "provided_functions": [
+        "scratchpad_write",
+        "scratchpad_read",
+        "scratchpad_clear"
+      ]
     },
     "tool-use": {
       "path": "skills/tool-use",
@@ -217,7 +259,10 @@
       "path": "skills/communication",
       "type": "demand",
       "dependencies": [],
-      "provided_functions": ["comm_broadcast", "comm_listen"]
+      "provided_functions": [
+        "comm_broadcast",
+        "comm_listen"
+      ]
     },
     "web-research": {
       "path": "skills/web-research",
@@ -240,6 +285,14 @@
         "eval_check_regression",
         "eval_update_high_water"
       ]
+    },
+    "code-linter": {
+      "path": "skills/code-linter",
+      "type": "demand",
+      "dependencies": [],
+      "provided_functions": [
+        "check_f_string_syntax"
+      ]
     }
   },
   "tool_routing": "unconstrained",
@@ -247,7 +300,10 @@
   "evolution": {
     "single_proposal_cycles": 20,
     "max_proposals_per_cycle": 5,
-    "modification_band": { "min_lines": 5, "max_lines": 50 },
+    "modification_band": {
+      "min_lines": 5,
+      "max_lines": 50
+    },
     "eval_frequency": 1
   },
   "context": {

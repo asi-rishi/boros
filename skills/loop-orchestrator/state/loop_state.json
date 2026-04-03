@@ -1,7 +1,7 @@
 {
-  "cycle": 0,
-  "stage": null,
+  "cycle": 1,
+  "stage": "EVOLVE",
   "mode": "evolution",
-  "cycle_started_at": null,
+  "cycle_started_at": "2026-04-03T12:04:25.411978Z",
   "total_cycles_completed": 0
 }

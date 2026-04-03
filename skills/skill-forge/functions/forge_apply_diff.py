@@ -17,6 +17,20 @@ def forge_apply_diff(params: dict, kernel=None) -> dict:
         for chunk in replacement_chunks:
             target = chunk.get("target_content", "")
             replacement = chunk.get("replacement_content", "")
+            
+            # === BOROS EVOLUTION: Automatic Syntax Validation ===
+            if kernel and 'check_f_string_syntax' in kernel.registry:
+                lint_result = kernel.registry['check_f_string_syntax'](
+                    {"code_string": replacement}, kernel
+                )
+                if lint_result.get("status") == "error":
+                    return {
+                        "status": "error",
+                        "message": "Syntax validation failed. Diff application aborted.",
+                        "details": lint_result.get("message")
+                    }
+            # === END BOROS EVOLUTION ===
+
             if target not in content:
                 return {"status": "error", "message": f"Target content not found: {target[:60]}..."}
             content = content.replace(target, replacement, 1)

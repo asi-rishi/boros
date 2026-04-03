@@ -1,0 +1,8 @@
+{
+  "outcome_score": 0.0,
+  "quality_score": 0.0,
+  "outcome_weight": 0.5,
+  "quality_weight": 0.5,
+  "quality_reason": "Task execution failed objectively. Transcript contains fatal tool errors. Score algorithmically capped at 0.0.",
+  "outcome_details": "Files created: resilience_score.txt, resilience_solver.py, selected_connections.txt, selected_supply_node_ids.txt"
+}
