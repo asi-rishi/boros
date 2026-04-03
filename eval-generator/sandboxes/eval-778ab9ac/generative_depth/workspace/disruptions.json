@@ -1,0 +1,7 @@
+{
+    "EconomicDownturn": ["market_diverse_products", "niche_product_X_production", "supply_chain_A"],
+    "SupplyChainShock": ["supply_chain_A", "supply_chain_B", "single_supply_chain_C"],
+    "MaterialFatigue": ["grain_boundary_path_1", "single_cleavage_plane", "crack_initiator_A"],
+    "HabitatLoss": ["live_in_forest", "live_only_in_mountain_Y"],
+    "DietaryCollapse": ["eat_berries", "eat_specific_plant_X"]
+}

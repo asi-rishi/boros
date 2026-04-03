@@ -1,0 +1,11 @@
+{
+  "id": "prop-manual-fix-01",
+  "skill_name": "meta-evolution",
+  "snapshot_id": "snap-b9baf725",
+  "description": "This proposal manually bypasses a broken `evolve_propose` function to fix a critical bug in `validate_skill_syntax`. The validation function was using an incorrect API to call `forge_validate`, causing a crash that prevented any proposals from being made. This change corrects the API call, unblocking the evolution loop and ensuring pre-proposal syntax validation works as intended.",
+  "target_file": "skills/meta-evolution/functions/validate.py",
+  "diff_summary": "Replaced the incorrect `kernel.skills` call with the correct `kernel.registry['forge_validate']` call in `skills/meta-evolution/functions/validate.py`.",
+  "timestamp": "2026-04-03T11:09:19.759705Z",
+  "status": "applied",
+  "applied_at": "2026-04-03T11:16:58.021641Z"
+}

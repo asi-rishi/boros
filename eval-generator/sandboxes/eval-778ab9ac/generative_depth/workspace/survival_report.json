@@ -1,0 +1,32 @@
+{
+    "GeneralistFirm": {
+        "survived_count": 5,
+        "total_disruptions": 5,
+        "survival_rate": 1.0
+    },
+    "SpecialistFirm": {
+        "survived_count": 3,
+        "total_disruptions": 5,
+        "survival_rate": 0.6
+    },
+    "ResilientMicrostructure": {
+        "survived_count": 5,
+        "total_disruptions": 5,
+        "survival_rate": 1.0
+    },
+    "BrittleMicrostructure": {
+        "survived_count": 4,
+        "total_disruptions": 5,
+        "survival_rate": 0.8
+    },
+    "GeneralistSpecies": {
+        "survived_count": 5,
+        "total_disruptions": 5,
+        "survival_rate": 1.0
+    },
+    "SpecialistSpecies": {
+        "survived_count": 3,
+        "total_disruptions": 5,
+        "survival_rate": 0.6
+    }
+}

@@ -1,0 +1,13 @@
+transaction_id,product_name,amount,currency,transaction_date,error
+TX00003,Keyboard,75.00,GBP,2023-03-10,Invalid Transaction ID format
+TRX00001,Headphones,100.00,USD,2023-03-15,Duplicate Transaction ID
+TRX00004,,10.00,USD,2023-04-01,Empty/Whitespace Product Name
+TRX00005,Buy SPAM now,5.00,GBP,2023-05-01,Product Name contains SPAM
+TRX00006,Monitor,-300.00,USD,2023-06-01,Invalid Amount
+TRX00007,Pen,0.00,EUR,2023-07-01,Invalid Amount
+TRX00008,Book,20.00,CDN,2023-08-01,Invalid Currency
+TRX00009,Desk,500.00,USD,2023/09/01,Invalid Date Format
+TRX00010,Chair,150.00,USD,2099-12-31,Future Date
+TRX00011,Multi-error SPAM,-50,XYZ,2023-10-01,Product Name contains SPAM;Invalid Amount;Invalid Currency
+TRX00002,Speaker,50.00,USD,2023-11-01,Duplicate Transaction ID
+TRX00013,Another SPAM,50.00,,2023-12-01,Product Name contains SPAM;Invalid Currency

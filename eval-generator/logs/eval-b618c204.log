@@ -1,0 +1,130 @@
+Eval: eval-b618c204 | Cycle: 999 | Categories: 2
+Composite Score: 0.550
+============================================================
+
+--- self_model_fidelity (score: 0.10) ---
+Task: **Programming Task: Transformer Attention with Context Window Management**
+
+Implement a Python script that simulates key aspects of a single-head transformer attention mechanism, including how it handles a nearly full context window. Your script should read inputs from specified files, perform calculations, and write outputs to other specified files.
+
+**Part 1: Attention Score Calculation**
+
+*   **Input Files:**
+    *   `query_vector.txt`: A single line of space-separated floating-point numbers representing the query vector for the token currently being processed.
+    *   `key_matrix.txt`: Multiple lines, each containing space-separated floating-point numbers, representing a matrix of key vectors for tokens in the current context. Each row is a key vector.
+*   **Process:**
+    1.  Load the `query_vector` and `key_matrix`.
+    2.  Calculate the raw attention scores by performing the dot product of the `query_vector` with each row (key vector) in the `key_matrix`.
+    3.  Apply a scaling factor: divide the raw scores by the square root of the dimension of the key vectors (i.e., `sqrt(key_matrix.shape[1])`).
+    4.  Apply the softmax function to these scaled scores to obtain attention probabilities.
+*   **Output File:**
+    *   `attention_probabilities.txt`: A single line of space-separated floating-point numbers representing the calculated attention probabilities.
+
+**Part 2: Context Window Management and Full Attention Output**
+
+*   **Input Files:**
+    *   `initial_context_keys.txt`: A matrix of key vectors for the existing tokens in the context window. Format is identical to `key_matrix.txt`.
+    *   `initial_context_values.txt`: A matrix of value vectors corresponding to `initial_context_keys`. Format is identical to `key_matrix.txt`.
+    *   `new_token_query.txt`: A single line of space-separated floating-point numbers representing the query vector for the newly arriving token.
+    *   `new_token_key.txt`: A single line of space-separated floating-point numbers representing the key vector for the newly arriving token.
+    *   `new_token_value.txt`: A single line of space-separated floating-point numbers representing the value vector for the newly arriving token.
+    *   `context_window_size.txt`: A single integer representing the maximum fixed size of the context window.
+*   **Process:**
+    1.  Load all input data.
+    2.  Determine the number of current tokens in the context window from `initial_context_keys.txt`.
+    3.  **Context Window Management:** If the number of current tokens is equal to the `context_window_size`, then simulate dropping the oldest token: remove the first row (the oldest token's key vector) from `initial_context_keys` and the first row (the oldest token's value vector) from `initial_context_values`.
+    4.  Append the `new_token_key` to the (potentially updated) `initial_context_keys` to form the `final_context_keys_matrix`.
+    5.  Append the `new_token_value` to the (potentially updated) `initial_context_values` to form the `final_context_values_matrix`.
+    6.  **Full Attention Output Calculation:**
+        *   Using `new_token_query` and `final_context_keys_matrix`, calculate the scaled attention probabilities as described in Part 1.
+        *   Compute the final attention output vector by performing a weighted sum of the rows in `final_context_values_matrix`, where the weights are the calculated attention probabilities.
+*   **Output File:**
+    *   `final_attention_output.txt`: A single line of space-separated floating-point numbers representing the calculated final attention output vector.
+
+Tool write_file: {"status": "ok"}
+Tool write_file: {"status": "ok"}
+Tool write_file: {"status": "ok"}
+Tool write_file: {"status": "ok"}
+Tool write_file: {"status": "ok"}
+Tool write_file: {"status": "ok"}
+Tool write_file: {"status": "ok"}
+Tool write_file: {"status": "ok"}
+Tool write_file: {"status": "ok"}
+Tool tool_terminal: {"status": "ok", "stdout": "", "stderr": "Python was not found; run without arguments to install from the Microsoft Store, or disable this shortcut from Settings > Apps > Advanced app settings > App execution aliases.\n", "returncode": 9009}
+Tool tool_terminal: {"status": "ok", "stdout": "", "stderr": "", "returncode": 0}
+Agent: I have executed the Python script `attention.py` which performs the two parts of the task.
+
+For Part 1, the script calculated the attention probabilities and saved them to `attention_probabilities.txt`.
+
+For Part 2, the script managed the context window, calculated the final attention output, and saved the result to `final_attention_output.txt`.
+
+Here are the contents of the output files:
+Tool read_file: {"status": "ok", "content": "0.32105391 0.35416348 0.32478261 "}
+Tool read_file: {"status": "ok", "content": "0.41892141 0.41994759 0.29469104 "}
+
+
+--- execution_reliability (score: 1.00) ---
+Task: Create a Python script `transaction_processor.py` that processes a CSV file of financial transactions according to a set of validation rules.
+
+**Input File (`transactions.csv`)**:
+The script should expect an input file named `transactions.csv` in the same directory. This file will have the following header and data format:
+`transaction_id,date,amount,currency,customer_id`
+
+Example `transactions.csv` content:
+```csv
+transaction_id,date,amount,currency,customer_id
+T001,2023-01-01,100.50,USD,C123
+T002,2023-01-02,25.00,EUR,C456
+T003,2023-01-03,-50.00,GBP,C789
+T004,2023-01-04,abc,USD,C101
+T005,2023-01-05,200.00,USD,
+T006,2023-01-06,150.75,AUD,C123
+T007,2023-01-07,10.00,USD,C999
+T008,2023-01-08,120.00,JPY,C102
+T009,T009,500.00,USD,C123
+T001,2023-01-10,10.00,USD,C124
+T010,invalid-date,75.00,USD,C103
+```
+
+**Validation Rules**:
+Each row must be validated against the following four rules:
+1.  **Unique Transaction ID**: The `transaction_id` must be unique across all rows *within the processed file*. If a duplicate `transaction_id` is encountered, the first instance (if valid by other rules) is accepted, and all subsequent instances with the same ID are rejected solely for this rule.
+2.  **Valid Date Format**: The `date` must be in 'YYYY-MM-DD' format and represent a real, valid date.
+3.  **Positive Amount**: The `amount` must be a positive decimal number (i.e., greater than 0).
+4.  **Supported Currency**: The `currency` must be one of 'USD', 'EUR', 'GBP', 'JPY'.
+
+**Output Files**:
+1.  **`output.csv`**: Write all rows that pass *all* validation rules to this file. The format should be identical to the input file (same columns, same order).
+2.  **`rejected.csv`**: Write all rows that fail *at least one* validation rule to this file. This file should include all original columns, plus an additional column named `error_reason` at the end. The `error_reason` column should contain a comma-separated list of the names of *all* rules that the row failed (e.g., "invalid_amount,unsupported_currency").
+
+**Console Output**:
+After processing, the script must print a summary to the console in the following exact format:
+```
+--- Transaction Processing Summary ---
+Total rows processed: <total_count>
+Rows accepted: <accepted_count>
+Rows rejected: <rejected_count>
+Rejection reasons breakdown:
+- unique_transaction_id: <count_unique_id_rejections>
+- valid_date_format: <count_date_rejections>
+- positive_amount: <count_amount_rejections>
+- supported_currency: <count_currency_rejections>
+```
+Note: A single rejected row can contribute to multiple rejection reason counts if it fails multiple rules.
+
+**Constraints**:
+*   Use standard Python libraries only (e.g., `csv`, `datetime`). No external third-party libraries (like `pandas`).
+*   The script should handle an empty `transactions.csv` gracefully.
+
+**Execution**:
+The script should be executable directly: `python transaction_processor.py`.
+
+**Verifiability**:
+The task is verifiable by examining the contents of `output.csv`, `rejected.csv`, and the printed console output against the specified rules and formats using the example `transactions.csv`.
+
+Tool write_file: {"status": "ok"}
+Tool write_file: {"status": "ok"}
+Agent: Now that I've created the `transactions.csv` file and the Python script `transaction_processor.py`, I'll execute the script to process the data. This will generate the `output.csv` and `rejected.csv` files and print the processing summary to the console, which I will then review to ensure everything is correct.
+Tool tool_terminal: {"status": "ok", "stdout": "--- Transaction Processing Summary ---\nTotal rows processed: 11\nRows accepted: 5\nRows rejected: 6\nRejection reasons breakdown:\n- unique_transaction_id: 1\n- valid_date_format: 2\n- positive_amount: 2\n- supported_currency: 1\n", "stderr": "", "returncode": 0}
+
+

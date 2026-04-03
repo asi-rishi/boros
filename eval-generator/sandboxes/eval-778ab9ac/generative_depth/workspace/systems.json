@@ -1,0 +1,52 @@
+{
+    "GeneralistFirm": {
+        "available_skills": ["market_diverse_products", "flexible_production_lines", "maintain_cash_reserves", "remote_work_setup", "supply_chain_A", "supply_chain_B"],
+        "essential_needs": {
+            "revenue": ["market_diverse_products", "supply_chain_A", "supply_chain_B"],
+            "operations": ["flexible_production_lines", "remote_work_setup"]
+        },
+        "fixed_obligations": ["maintain_cash_reserves"]
+    },
+    "SpecialistFirm": {
+        "available_skills": ["niche_product_X_production", "rigid_assembly_line", "single_supply_chain_C", "on_site_only_staff", "specialized_marketing_X"],
+        "essential_needs": {
+            "revenue": ["niche_product_X_production", "single_supply_chain_C", "specialized_marketing_X"],
+            "operations": ["rigid_assembly_line", "on_site_only_staff"]
+        },
+        "fixed_obligations": ["niche_product_X_production", "rigid_assembly_line", "single_supply_chain_C"]
+    },
+    "ResilientMicrostructure": {
+        "available_skills": ["grain_boundary_path_1", "grain_boundary_path_2", "grain_boundary_path_3", "dislocation_mobility", "strain_hardening"],
+        "essential_needs": {
+            "load_bearing": ["grain_boundary_path_1", "grain_boundary_path_2", "grain_boundary_path_3"],
+            "deformation_resistance": ["dislocation_mobility", "strain_hardening"]
+        },
+        "fixed_obligations": []
+    },
+    "BrittleMicrostructure": {
+        "available_skills": ["single_cleavage_plane", "minimal_grain_boundaries", "crack_initiator_A"],
+        "essential_needs": {
+            "load_bearing": ["single_cleavage_plane"],
+            "deformation_resistance": ["minimal_grain_boundaries"]
+        },
+        "fixed_obligations": ["single_cleavage_plane", "crack_initiator_A"]
+    },
+    "GeneralistSpecies": {
+        "available_skills": ["eat_berries", "eat_insects", "eat_small_mammals", "live_in_forest", "live_in_grassland", "find_water_sources"],
+        "essential_needs": {
+            "food": ["eat_berries", "eat_insects", "eat_small_mammals"],
+            "habitat": ["live_in_forest", "live_in_grassland"],
+            "hydration": ["find_water_sources"]
+        },
+        "fixed_obligations": []
+    },
+    "SpecialistSpecies": {
+        "available_skills": ["eat_specific_plant_X", "live_only_in_mountain_Y", "rare_mineral_source"],
+        "essential_needs": {
+            "food": ["eat_specific_plant_X"],
+            "habitat": ["live_only_in_mountain_Y"],
+            "mineral": ["rare_mineral_source"]
+        },
+        "fixed_obligations": ["eat_specific_plant_X", "live_only_in_mountain_Y"]
+    }
+}
