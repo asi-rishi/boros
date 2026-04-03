@@ -29,8 +29,8 @@ def tool_terminal(params: dict, kernel=None) -> dict:
             result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=120)
             return {
                 "status": "ok", 
-                "stdout": result.stdout[:4000],  # truncated to prevent extreme overfloods 
-                "stderr": result.stderr[:4000], 
+                "stdout": (result.stdout or "")[:4000],  # truncated to prevent extreme overfloods 
+                "stderr": (result.stderr or "")[:4000], 
                 "returncode": result.returncode
             }
         except subprocess.TimeoutExpired:

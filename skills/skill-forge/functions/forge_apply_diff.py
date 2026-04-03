@@ -1,5 +1,7 @@
 
 import os
+import py_compile
+
 def forge_apply_diff(params: dict, kernel=None) -> dict:
     """Apply a diff to a skill's function file using find-and-replace."""
     target_file = params.get("target_file", "")
@@ -12,31 +14,32 @@ def forge_apply_diff(params: dict, kernel=None) -> dict:
 
     try:
         with open(target_file, "r") as f:
-            content = f.read()
+            original_content = f.read()
+            
+        content = original_content
 
         for chunk in replacement_chunks:
             target = chunk.get("target_content", "")
             replacement = chunk.get("replacement_content", "")
             
-            # === BOROS EVOLUTION: Automatic Syntax Validation ===
-            if kernel and 'check_f_string_syntax' in kernel.registry:
-                lint_result = kernel.registry['check_f_string_syntax'](
-                    {"code_string": replacement}, kernel
-                )
-                if lint_result.get("status") == "error":
-                    return {
-                        "status": "error",
-                        "message": "Syntax validation failed. Diff application aborted.",
-                        "details": lint_result.get("message")
-                    }
-            # === END BOROS EVOLUTION ===
-
             if target not in content:
                 return {"status": "error", "message": f"Target content not found: {target[:60]}..."}
             content = content.replace(target, replacement, 1)
 
         with open(target_file, "w") as f:
             f.write(content)
+            
+        if target_file.endswith(".py"):
+            try:
+                py_compile.compile(target_file, doraise=True)
+            except py_compile.PyCompileError as build_err:
+                with open(target_file, "w") as f:
+                    f.write(original_content)
+                return {
+                    "status": "error",
+                    "message": "Syntax validation failed. Diff application aborted.",
+                    "details": str(build_err)
+                }
 
         return {"status": "ok", "message": f"Applied {len(replacement_chunks)} chunks to {target_file}"}
     except Exception as e:

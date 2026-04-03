@@ -6,6 +6,23 @@ class ToolDispatcher:
         self.sandbox_path = sandbox_path
         self.kernel = kernel
         
+    def _safe_path(self, target):
+        """Resolves target path while strictly preventing directory traversal escaping."""
+        if not target:
+            target = "temp.txt"
+        target = target.replace("\\", "/")
+        # Strip absolute prefixes
+        if target.startswith("/"): target = target.lstrip("/")
+        if len(target) > 1 and target[1] == ":": target = target[2:].lstrip("/")
+        
+        final_path = os.path.abspath(os.path.join(self.sandbox_path, target))
+        sandbox_abs = os.path.abspath(self.sandbox_path)
+        
+        if not final_path.startswith(sandbox_abs):
+            # Fallback for malicious or accidental escape attempts
+            return os.path.abspath(os.path.join(sandbox_abs, os.path.basename(target)))
+        return final_path
+
     def dispatch(self, tool_name, kwargs):
         try:
             # ───────────────────────────────────────────────
@@ -29,8 +46,7 @@ class ToolDispatcher:
                 
             elif tool_name == "tool_file_edit_diff":
                 target_file = kwargs.get("target_file", "")
-                # Ensure constrained strictly to sandbox
-                filepath = os.path.join(self.sandbox_path, os.path.basename(target_file))
+                filepath = self._safe_path(target_file)
                 replacement_chunks = kwargs.get("replacement_chunks", [])
                 
                 if not os.path.exists(filepath):
@@ -57,12 +73,13 @@ class ToolDispatcher:
             elif tool_name in ("write_file", "read_file", "list_directory"):
                 # Stub generic tools
                 if tool_name == "write_file":
-                    filepath = os.path.join(self.sandbox_path, kwargs.get("path", "temp.txt"))
+                    filepath = self._safe_path(kwargs.get("path", "temp.txt"))
+                    os.makedirs(os.path.dirname(filepath), exist_ok=True)
                     with open(filepath, "w") as f:
                         f.write(kwargs.get("content", ""))
                     return {"status": "ok"}
                 elif tool_name == "read_file":
-                    filepath = os.path.join(self.sandbox_path, kwargs.get("path", "temp.txt"))
+                    filepath = self._safe_path(kwargs.get("path", "temp.txt"))
                     if not os.path.exists(filepath): return {"status": "error", "message": "not found"}
                     with open(filepath, "r") as f:
                         content = f.read()

@@ -1,8 +1,0 @@
-{
-  "proposal_id": "prop-manual-fix-01",
-  "verdict": "apply",
-  "reason": "This proposal corrects a critical bug by fixing an incorrect API call, unblocking the `validate_skill_syntax` function and the evolution loop. The change is programmatic, directly resolves a runtime error, and genuinely improves system functionality without introducing new risks. It addresses a core operational defect and is not merely cosmetic.",
-  "confidence": 0.95,
-  "timestamp": "2026-04-03T11:09:37.141111Z",
-  "reviewer": "meta_eval_llm"
-}

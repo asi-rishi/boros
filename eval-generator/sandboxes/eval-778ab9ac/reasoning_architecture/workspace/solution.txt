@@ -1,7 +1,0 @@
-Farmer takes Goat
-Farmer moves alone
-Farmer takes Wolf
-Farmer takes Goat
-Farmer takes Cabbage
-Farmer moves alone
-Farmer takes Goat
