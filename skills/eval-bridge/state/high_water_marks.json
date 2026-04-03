@@ -3,7 +3,7 @@
   "epistemic_calibration": 0.0,
   "reasoning_architecture": 0.0,
   "complexity_navigation": 0.0,
-  "domain_snap": 0.0,
+  "domain_snap": 0.1,
   "hypothesis_engine": 0.0,
   "generative_depth": 0.0,
   "execution_reliability": 0.0,

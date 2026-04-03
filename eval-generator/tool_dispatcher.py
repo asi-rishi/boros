@@ -5,6 +5,8 @@ class ToolDispatcher:
     def __init__(self, sandbox_path, kernel):
         self.sandbox_path = sandbox_path
         self.kernel = kernel
+        self.sandbox_scratchpad = {}
+
         
     def _safe_path(self, target):
         """Resolves target path while strictly preventing directory traversal escaping."""
@@ -86,11 +88,26 @@ class ToolDispatcher:
                     return {"status": "ok", "content": content}
                 elif tool_name == "list_directory":
                     return {"status": "ok", "files": os.listdir(self.sandbox_path)}
+                elif tool_name == "scratchpad_write":
+                    self.sandbox_scratchpad[kwargs.get("key", "")] = kwargs.get("value", "")
+                    return {"status": "ok"}
+                elif tool_name == "scratchpad_read":
+                    return {"status": "ok", "value": self.sandbox_scratchpad.get(kwargs.get("key", ""))}
+                elif tool_name == "scratchpad_clear":
+                    if kwargs.get("key"):
+                        self.sandbox_scratchpad.pop(kwargs.get("key", ""), None)
+                    else:
+                        self.sandbox_scratchpad.clear()
+                    return {"status": "ok"}
 
             # ───────────────────────────────────────────────
             # True Boros Capabilities
             # ───────────────────────────────────────────────
             elif tool_name in self.kernel.registry:
+                # Security: Block state-mutating core skills from being invoked inside sandbox
+                blocked_prefixes = ("memory_", "identity_", "loop_", "evolve_", "eval_", "forge_", "mission_", "comm_", "router_", "context_", "reflection_")
+                if any(tool_name.startswith(p) for p in blocked_prefixes):
+                    return {"status": "error", "error": f"Tool {tool_name} is prohibited in sandbox."}
                 return self.kernel.registry[tool_name](kwargs, self.kernel)
 
             return {"status": "error", "error": "unknown tool"}

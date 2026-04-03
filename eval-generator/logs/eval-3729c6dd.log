@@ -1,0 +1,160 @@
+Eval: eval-3729c6dd | Cycle: 1 | Categories: 2
+Composite Score: 0.050
+============================================================
+
+--- generative_depth (score: 0.00) ---
+Task: **Programming Puzzle: Resilient Network Router**
+
+**Objective:**
+Implement a Python script named `resilient_router.py` that processes network routing tasks, demonstrating resilience by finding alternative paths when specific nodes are identified as "critical" and must be avoided. This task is inspired by the structural principle of resilience observed in diverse systems – the ability to adapt and utilize alternative pathways or resources when primary ones are compromised.
+
+**Input Files:**
+
+1.  **`network.txt`**: Defines the connections in an undirected graph. Each line contains two space-separated node identifiers (e.g., `A B`), representing an edge between them. All node identifiers will be single uppercase letters.
+    *   Example `network.txt`:
+        ```
+        A B
+        B C
+        C D
+        D E
+        A F
+        F E
+        ```
+
+2.  **`tasks.txt`**: Defines routing requests. Each line contains three space-separated node identifiers: `SOURCE_NODE DESTINATION_NODE CRITICAL_NODE`. All nodes mentioned in `tasks.txt` will exist in `network.txt`.
+    *   For each task, your script must find a path from `SOURCE_NODE` to `DESTINATION_NODE`.
+    *   The path found *must not* contain `CRITICAL_NODE` as an intermediate node. If `CRITICAL_NODE` is the `SOURCE_NODE` or `DESTINATION_NODE` itself, this rule does not apply to that specific instance of `CRITICAL_NODE` (i.e., you can start or end at the critical node, but not pass through it).
+    *   Example `tasks.txt`:
+        ```
+        A E C
+        A E F
+        B D C
+        A D F
+        ```
+
+**Output File:**
+
+1.  **`paths.txt`**: This file should contain the result for each task from `tasks.txt`, in the same order.
+    *   Each line should represent the found path as a sequence of nodes connected by ` -> ` (e.g., `A -> B -> C`).
+    *   If a path was successfully found that avoided the specified `CRITICAL_NODE` (as an intermediate), append ` (avoided X)` to the path, where `X` is the critical node.
+    *   If a path was found and the `CRITICAL_NODE` was not on that path (meaning no avoidance was necessary), simply output the path without any suffix.
+    *   If no path from `SOURCE_NODE` to `DESTINATION_NODE` exists under the given avoidance constraint, output `NO_PATH (avoid X)` for that task.
+
+**Task Requirements:**
+
+1.  Your script `resilient_router.py` should read `network.txt` and `tasks.txt` from the current working directory.
+2.  It should implement a graph traversal algorithm (e.g., Breadth-First Search or Depth-First Search) to find paths. You should aim to find *any* valid path that meets the criteria, not necessarily the shortest one.
+3.  For each task, determine and output the appropriate path or `NO_PATH` message to `paths.txt`.
+
+**Example Scenario (using the example inputs above):**
+
+Given `network.txt`:
+```
+A B
+B C
+C D
+D E
+A F
+F E
+```
+This network has two main paths from A to E: `A-B-C-D-E` and `A-F-E`. And `B-C-D` from B to D.
+
+Given `tasks.txt`:
+```
+A E C   # Task 1
+A E F   # Task 2
+B D C   # Task 3
+A D F   # Task 4
+```
+
+Expected `paths.txt`:
+```
+A -> F -> E (avoided C)
+A -> B -> C -> D -> E (avoided F)
+NO_PATH (avoid C)
+A -> B -> C -> D
+```
+*(Explanation for expected output)*
+*   **Task 1 (`A E C`):** The path `A -> B -> C -> D -> E` contains `C`. The script must find an alternative. `A -> F -> E` avoids `C`.
+*   **Task 2 (`A E F`):** The path `A -> F -> E` contains `F`. The script must find an alternative. `A -> B -> C -> D -> E` avoids `F`.
+*   **Task 3 (`B D C`):** The only path from `B` to `D` in this network is `B -> C -> D`. Since `C` must be avoided as an intermediate node, no valid path exists.
+*   **Task 4 (`A D F`):** A path from `A` to `D` is `A -> B -> C -> D`. This path does not contain `F`. Therefore, this path is valid, and no "avoided F" suffix is needed.
+
+Tool write_file: {"status": "ok"}
+Tool write_file: {"status": "ok"}
+Tool write_file: {"status": "ok"}
+
+
+--- domain_snap (score: 0.10) ---
+Task: You are now operating under the following legal jurisdiction ruleset for contract disputes. Your client, InnovateTech Inc., has approached you with a contract dispute scenario. Your task is to analyze their legal position under this specific jurisdiction.
+
+---
+
+### **Jurisdiction Ruleset for Contract Disputes:**
+
+1.  **Offer Validity:** An offer made via email is only valid for 48 hours from its send time, unless a specific, longer expiry date is explicitly stated in the offer itself. If no expiry is stated and 48 hours pass, the offer automatically expires.
+2.  **Acceptance Method:** Acceptance must be communicated via the same medium as the offer (e.g., email offer requires email acceptance) and must explicitly state "I accept" or "We agree." Any deviation or additional terms constitute a counter-offer.
+3.  **Silence as Acceptance:** Silence can constitute acceptance ONLY if the offer explicitly states "Your silence within [X] hours will be deemed acceptance" AND the parties have a prior documented course of dealing involving at least 5 similar contracts where silence was agreed upon as acceptance.
+4.  **Consideration:** Consideration must be a tangible item, service, or a legally enforceable promise to provide such. A promise to perform a pre-existing legal duty (even if owed to a third party) is NOT valid consideration.
+5.  **Revocation:** An offer is revocable at any time before acceptance, UNLESS the offer explicitly states it is "irrevocable" for a specific duration, in which case it is irrevocable for that period up to a maximum of 30 days.
+6.  **Breach Definition:** A 'breach' occurs only when a party fails to perform a contractual obligation AND sends an explicit written notification to the other party stating their inability or refusal to perform. Oral notification is insufficient.
+7.  **Remedy for Services:** For contracts involving services, the primary remedy for breach is specific performance (i.e., compelling the breaching party to complete the service). Monetary damages are only available if specific performance is impossible or would cause undue hardship, in which case damages are capped at 1.25 times the agreed-upon contract value.
+8.  **Contract for Goods Terms:** Any contract for the sale of goods over $500 must explicitly state the quantity, price per unit, and delivery date. Omission of any of these makes the contract unenforceable.
+9.  **Electronic Signatures:** Electronic signatures are valid and binding for all contract types, EXCEPT those involving intellectual property rights or real estate, which require a wet-ink signature.
+10. **Modification:** Any modification to an existing contract must be in writing, signed by both parties, and supported by fresh consideration. Unilateral declarations of modification are invalid.
+
+---
+
+### **Client Scenario:**
+
+Your client, "InnovateTech Inc.," is a software development company. They entered into discussions with "GlobalCorp Holdings" for a custom project management software.
+
+*   **June 1st, 2024, 10:00 AM PST:** InnovateTech sends an email to GlobalCorp: "We propose to develop the 'Project Horizon' software for a fixed price of $50,000. This offer is valid until June 8th, 2024, 10:00 AM PST. Our standard terms and conditions (attached) apply, including that your silence will be deemed acceptance within 72 hours if you have purchased 5 or more similar software development projects from us in the past." (Note: InnovateTech has only completed 3 similar projects for GlobalCorp previously).
+*   **June 2nd, 2024, 09:00 AM PST:** GlobalCorp emails back: "We are interested. Could you provide a breakdown of the development phases and an estimated completion date?"
+*   **June 3rd, 2024, 11:00 AM PST:** InnovateTech replies: "Phase 1 (Design) - 2 weeks, Phase 2 (Development) - 8 weeks, Phase 3 (Testing) - 2 weeks. Total estimated completion: 12 weeks from contract signing. We will ensure the software is delivered, and we guarantee our services."
+*   **June 4th, 2024, 05:00 PM PST:** GlobalCorp emails back: "We accept your proposal for 'Project Horizon' at $50,000. We agree to all your terms. Please proceed."
+*   **July 1st, 2024:** InnovateTech informs GlobalCorp via a phone call that due to unforeseen circumstances, they cannot proceed with the project.
+*   **July 3rd, 2024:** InnovateTech sends an email to GlobalCorp stating, "Due to internal restructuring, we regret to inform you that we are unable to fulfill the 'Project Horizon' contract."
+
+GlobalCorp is furious. They want to know their legal position and are primarily seeking specific performance (they need the software). If not possible, they want the maximum possible monetary damages.
+
+---
+
+### **Task:**
+
+Write a Python script that analyzes the provided scenario based *only* on the jurisdiction ruleset above. Your script should determine GlobalCorp's legal position.
+
+**Output:** Your script must create a file named `legal_position.json` in the current directory. This file must contain a JSON object with the following structure:
+
+```json
+{
+    "valid_contract": true,
+    "contract_terms": {
+        "project_name": "Project Horizon",
+        "price": 50000.0,
+        "delivery_estimate_weeks": 12
+    },
+    "breach_occurred": true,
+    "breaching_party": "InnovateTech Inc.",
+    "available_remedy": "Specific Performance",
+    "monetary_damages_cap": null,
+    "reasoning": [
+        "Rule 1: Offer was valid as it was accepted before the stated expiry.",
+        "Rule 2: Acceptance was valid as it was via the same medium and explicitly stated agreement.",
+        // ... add detailed reasoning for all key decisions based on the rules ...
+    ]
+}
+```
+
+*   `valid_contract`: Boolean (True if a valid contract was formed, False otherwise).
+*   `contract_terms`: Dictionary containing core terms (`project_name`, `price`, `delivery_estimate_weeks`) if a valid contract exists; otherwise, `null`.
+*   `breach_occurred`: Boolean (True if a breach occurred, False otherwise).
+*   `breaching_party`: String name of the party that breached the contract (e.g., "InnovateTech Inc.", "GlobalCorp Holdings") if a breach occurred; otherwise, `null`.
+*   `available_remedy`: String representing the primary available remedy ("Specific Performance", "Monetary Damages", "No Remedy").
+*   `monetary_damages_cap`: Float representing the maximum monetary damages if "Monetary Damages" is the `available_remedy`; otherwise, `null`.
+*   `reasoning`: A list of strings, each explaining a key decision point or conclusion, referencing the specific rule number(s) that justify it. Ensure *all* relevant rules are addressed, even if they explain why something *didn't* happen (e.g., why silence was not acceptance).
+
+Tool write_file: {"status": "ok"}
+Agent: I have analyzed the scenario and created the `legal_position.json` file as requested, detailing GlobalCorp's legal position based on the provided jurisdiction ruleset.
+
+

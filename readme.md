@@ -39,9 +39,6 @@ pip install anthropic openai prompt_toolkit rich python-dotenv
 
 # Review and customize the World Model (scoring categories)
 # Edit boros/world_model.json — starter rubrics are included
-
-# Start
-python boros/kernel.py
 ```
 
 ### First Boot
@@ -216,7 +213,7 @@ Once Boros reaches Prime (~0.85+ composite at Level 4 difficulty):
 1. Clone the Prime Boros directory
 2. Add domain-specific categories to `world_model.json` (on top of the 10 general ones)
 3. Write domain rubrics with real-world anchors
-4. Run `python boros/kernel.py` — fork inherits all general high-water marks
+4. Run `python boros.py` — fork inherits all general high-water marks
 5. Domain expertise accumulates while general capability is maintained
 
 Examples: Boros-SWE (add: code quality, test coverage, architecture). Boros-Legal (add: citation accuracy, precedent analysis). Boros-Finance (add: quantitative reasoning, risk assessment).

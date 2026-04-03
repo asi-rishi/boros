@@ -293,6 +293,14 @@
       "provided_functions": [
         "check_f_string_syntax"
       ]
+    },
+    "eval_util": {
+      "path": "skills/eval_util",
+      "type": "demand",
+      "dependencies": [],
+      "provided_functions": [
+        "generate_evaluation_artifact"
+      ]
     }
   },
   "tool_routing": "unconstrained",

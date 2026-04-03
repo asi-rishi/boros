@@ -1,0 +1,8 @@
+{
+  "outcome_score": 0.0,
+  "quality_score": 0.0,
+  "outcome_weight": 0.5,
+  "quality_weight": 0.5,
+  "quality_reason": "Task execution failed objectively. Agent failed to produce any artifacts. Score algorithmically capped at 0.0.",
+  "outcome_details": "No files created."
+}

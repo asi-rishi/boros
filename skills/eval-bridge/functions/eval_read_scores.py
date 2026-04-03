@@ -69,7 +69,13 @@ def eval_read_scores(params: dict, kernel=None) -> dict:
                                 if lines:
                                     last_entry = json.loads(lines[-1])
                                     if last_entry.get("eval_id") == latest.get("eval_id"):
-                                        return {"status": "error", "message": "No new evaluation results found. The latest result is already in the score history. Did you forget to provide eval_id?"}
+                                        return {
+                                            "status": "ok", 
+                                            "message": "Returned latest evaluation results (already in score history).",
+                                            "scores": latest.get("scores", {}),
+                                            "composite": latest.get("composite", 0),
+                                            "latest_eval_id": latest.get("eval_id", "")
+                                        }
                         except Exception:
                             pass
                     

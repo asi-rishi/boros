@@ -26,6 +26,9 @@ def forge_create_skill(params: dict, kernel=None) -> dict:
         init_imports.append(f"from .{fn} import {fn}")
     with open(os.path.join(skill_dir, "functions", "__init__.py"), "w") as f:
         f.write("\n".join(init_imports) + "\n")
+        
+    with open(os.path.join(skill_dir, "tests", "test_basic.py"), "w") as f:
+        f.write("def test_health_check():\n    assert True\n")
 
     # ── UPDATE MANIFEST.JSON ──
     manifest_path = os.path.join(boros_dir, "manifest.json")

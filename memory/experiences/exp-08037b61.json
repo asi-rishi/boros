@@ -1,0 +1,13 @@
+{
+  "id": "exp-08037b61",
+  "type": "lesson",
+  "content": "The evaluation of 'domain_snap' and 'generative_depth' requires not only the creation of output artifacts but also the explicit display of the Python code that produced them, as well as the content of the artifacts themselves, within the transcript. Simply creating files in the shared directory is insufficient. Future improvements targeting these skills must ensure that all relevant code and artifact content are printed to the console using `tool_terminal` to be visible to the evaluator.",
+  "tags": [
+    "evaluation_criteria",
+    "generative_depth",
+    "domain_snap",
+    "transcript_requirements",
+    "artifact_output"
+  ],
+  "timestamp": "2026-04-03T17:29:17.611061Z"
+}
