@@ -41,12 +41,32 @@ def reflection_analyze_trace(params: dict, kernel=None) -> dict:
                         category_scores[cat] = []
                     category_scores[cat].append(score)
 
-    # Calculate averages and trends
+    # Read actual active categories from world_model.json
+    wm_path = os.path.join(boros_dir, "world_model.json")
+    active_categories = {}
+    if os.path.exists(wm_path):
+        try:
+            with open(wm_path) as f:
+                wm = json.load(f)
+                active_categories = wm.get("categories", {})
+        except Exception:
+            pass
+
+    # Calculate averages and trends only for active categories
     analysis = {}
     weakest_category = None
     lowest_avg = 1.0
+    
+    # Initialize all active categories with 0.0 if they have no scores
+    for cat in active_categories:
+        if cat not in category_scores:
+            category_scores[cat] = []
+
     for cat, scores in category_scores.items():
-        avg = sum(scores) / len(scores) if scores else 0
+        if cat not in active_categories:
+            continue # Ignore categories from old score history that are now deleted
+
+        avg = sum(scores) / len(scores) if scores else 0.0
         trend = "stable"
         if len(scores) >= 2:
             if scores[-1] > scores[0]:
@@ -54,7 +74,9 @@ def reflection_analyze_trace(params: dict, kernel=None) -> dict:
             elif scores[-1] < scores[0]:
                 trend = "declining"
         analysis[cat] = {"average": round(avg, 3), "trend": trend, "samples": len(scores), "latest": scores[-1] if scores else 0}
-        if avg < lowest_avg:
+        
+        # We want to strictly find the weakest category
+        if avg <= lowest_avg:
             lowest_avg = avg
             weakest_category = cat
 

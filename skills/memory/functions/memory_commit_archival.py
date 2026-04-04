@@ -12,6 +12,15 @@ def memory_commit_archival(params: dict, kernel=None) -> dict:
     }
     exp_dir = os.path.join(boros_dir, "memory", "experiences")
     os.makedirs(exp_dir, exist_ok=True)
-    with open(os.path.join(exp_dir, f"{entry['id']}.json"), "w") as f:
-        json.dump(entry, f, indent=2)
-    return {"status": "ok", "entry_id": entry["id"]}
+    try:
+        with open(os.path.join(exp_dir, f"{entry['id']}.json"), "w") as f:
+            json.dump(entry, f, indent=2)
+        return {"status": "ok", "entry_id": entry["id"]}
+    except IOError as e:
+        error_msg = f"Failed to commit archival entry {entry['id']}: {e}"
+        if kernel and hasattr(kernel, 'log') and hasattr(kernel.log, 'error'):
+            kernel.log.error(error_msg)
+        else:
+            import sys
+            print(f"ERROR: {error_msg}", file=sys.stderr)
+        return {"status": "error", "message": error_msg}

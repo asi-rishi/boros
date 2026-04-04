@@ -15,7 +15,7 @@ from tool_dispatcher import ToolDispatcher
 # Logging helper
 # ─────────────────────────────────────────────────────────────
 def _log(msg, level="INFO"):
-    ts = datetime.datetime.utcnow().strftime("%H:%M:%S")
+    ts = datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
     prefix = {"INFO": "ℹ", "OK": "✔", "WARN": "⚠", "ERR": "✗", "START": "►", "END": "■"}.get(level, "·")
     line = f"[{ts}] {prefix}  {msg}"
     print(line, flush=True)
@@ -392,7 +392,7 @@ class EvalGenerator:
             result = {
                 "request_id": req.get("request_id", "unknown"),
                 "eval_id": eval_id,
-                "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+                "timestamp": datetime.datetime.now(datetime.UTC).isoformat().replace("+00:00", "Z"),
                 "cycle": cycle,
                 "scores": {k: v["outcome_score"] for k, v in scores.items()},
                 "composite": composite_score,

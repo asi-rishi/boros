@@ -121,6 +121,9 @@ def evolve_orient(params: dict, kernel=None) -> dict:
         candidates = filtered_targets[:max(5, len(filtered_targets) // 5)]
     random.shuffle(candidates)
 
+    if weakest_score == float("inf"):
+        weakest_score = 999.0
+
     return {
         "status": "ok",
         "weakest_category": weakest_category,

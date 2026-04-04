@@ -6,32 +6,32 @@ class DDGParser(HTMLParser):
     def __init__(self):
         super().__init__()
         self.results = []
-        self.in_result = False
-        self.in_title = False
-        self.in_snippet = False
+        self.in_result_link = False
+        self.in_result_snippet = False
         self.current_result = {}
         
     def handle_starttag(self, tag, attrs):
         attrs_dict = dict(attrs)
-        if tag == 'a' and 'class' in attrs_dict and 'result__snippet' in attrs_dict['class']:
-            self.in_snippet = True
+        if tag == 'a' and 'class' in attrs_dict and 'result__a' in attrs_dict['class']:
+            self.in_result_link = True
             self.current_result['link'] = attrs_dict.get('href', '')
-        if tag == 'h2' and 'class' in attrs_dict and 'result__title' in attrs_dict['class']:
-            self.in_title = True
+        if tag == 'a' and 'class' in attrs_dict and 'result__snippet' in attrs_dict['class']:
+            self.in_result_snippet = True
             
     def handle_endtag(self, tag):
-        if tag == 'a' and self.in_snippet:
-            self.in_snippet = False
-            self.results.append(self.current_result)
+        if tag == 'a' and self.in_result_link:
+            self.in_result_link = False
+            if self.current_result.get('title') and self.current_result.get('snippet'):
+                self.results.append(self.current_result)
             self.current_result = {}
-        if tag == 'h2' and self.in_title:
-            self.in_title = False
+        if tag == 'a' and self.in_result_snippet:
+            self.in_result_snippet = False
 
     def handle_data(self, data):
-        if self.in_snippet:
+        if self.in_result_link and not self.current_result.get('title'):
+            self.current_result['title'] = data.strip()
+        if self.in_result_snippet:
             self.current_result['snippet'] = self.current_result.get('snippet', '') + data.strip()
-        if self.in_title:
-            self.current_result['title'] = self.current_result.get('title', '') + data.strip()
 
 def research_search_engine(params: dict, kernel=None) -> dict:
     query = params.get("query", "")

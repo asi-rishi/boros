@@ -61,6 +61,17 @@ Generate the JSON plan now.
         # Basic validation of the generated plan structure
         if "plan" not in plan_json or not isinstance(plan_json["plan"], list):
             return {"status": "error", "message": "Generated JSON is missing the root 'plan' array.", "raw_plan": plan_json}
+        
+        if not plan_json["plan"]:
+            return {"status": "error", "message": "Generated plan is empty. It must contain at least one step.", "raw_plan": plan_json}
+
+        required_step_keys = ["step", "action", "tool", "expected_artifact"]
+        for i, step in enumerate(plan_json["plan"]):
+            if not isinstance(step, dict):
+                return {"status": "error", "message": f"Plan step {i+1} is not a valid object.", "raw_plan": plan_json}
+            for key in required_step_keys:
+                if key not in step:
+                    return {"status": "error", "message": f"Plan step {i+1} is missing the required key: '{key}'.", "raw_plan": plan_json}
 
         return {"status": "ok", "plan": plan_json}
 
