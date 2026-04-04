@@ -58,8 +58,6 @@
   },
   "boot_sequence": [
     "mode-controller",
-    "temporal-consciousness",
-    "identity",
     "memory",
     "skill-router",
     "context-orchestration",
@@ -78,36 +76,11 @@
         "mode_set"
       ]
     },
-    "temporal-consciousness": {
-      "path": "skills/temporal-consciousness",
-      "type": "boot",
-      "dependencies": [
-        "mode-controller"
-      ],
-      "provided_functions": [
-        "time_now",
-        "time_elapsed_since",
-        "time_cycle_started",
-        "time_estimate_remaining"
-      ]
-    },
-    "identity": {
-      "path": "skills/identity",
-      "type": "boot",
-      "dependencies": [
-        "mode-controller"
-      ],
-      "provided_functions": [
-        "identity_read",
-        "identity_update"
-      ]
-    },
     "memory": {
       "path": "skills/memory",
       "type": "boot",
       "dependencies": [
-        "mode-controller",
-        "identity"
+        "mode-controller"
       ],
       "provided_functions": [
         "memory_page_in",
@@ -133,7 +106,6 @@
       "type": "boot",
       "dependencies": [
         "mode-controller",
-        "identity",
         "memory"
       ],
       "provided_functions": [
@@ -214,16 +186,6 @@
         "forge_create_skill"
       ]
     },
-    "mission-control": {
-      "path": "skills/mission-control",
-      "type": "demand",
-      "dependencies": [],
-      "provided_functions": [
-        "mission_read",
-        "mission_queue_task",
-        "mission_update_status"
-      ]
-    },
     "reasoning": {
       "path": "skills/reasoning",
       "type": "demand",
@@ -232,16 +194,6 @@
         "reason_decompose",
         "reason_evaluate_options",
         "reason_check_logic"
-      ]
-    },
-    "scratchpad": {
-      "path": "skills/scratchpad",
-      "type": "demand",
-      "dependencies": [],
-      "provided_functions": [
-        "scratchpad_write",
-        "scratchpad_read",
-        "scratchpad_clear"
       ]
     },
     "tool-use": {
@@ -253,15 +205,6 @@
         "tool_terminal_input",
         "tool_terminal_kill",
         "tool_file_edit_diff"
-      ]
-    },
-    "communication": {
-      "path": "skills/communication",
-      "type": "demand",
-      "dependencies": [],
-      "provided_functions": [
-        "comm_broadcast",
-        "comm_listen"
       ]
     },
     "web-research": {
@@ -284,14 +227,6 @@
         "eval_backfill",
         "eval_check_regression",
         "eval_update_high_water"
-      ]
-    },
-    "code-linter": {
-      "path": "skills/code-linter",
-      "type": "demand",
-      "dependencies": [],
-      "provided_functions": [
-        "check_f_string_syntax"
       ]
     },
     "eval_util": {

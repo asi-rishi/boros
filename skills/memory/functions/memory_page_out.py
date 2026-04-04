@@ -2,7 +2,7 @@
 import os, json
 def memory_page_out(params: dict, kernel=None) -> dict:
     """Write key-value data to the current session buffer."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     key = params.get("key", "")
     value = params.get("value", "")
     sess_dir = os.path.join(boros_dir, "memory", "sessions")

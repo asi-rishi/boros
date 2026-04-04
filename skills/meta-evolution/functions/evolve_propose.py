@@ -4,12 +4,12 @@ from .validate import validate_skill_syntax
 def evolve_propose(params: dict, kernel=None) -> dict:
     """Create a formal evolution proposal. Stores proposal artifact in session."""
     
-    # First, validate the skill's syntax
-    skill_name_to_validate = params.get("skill_name")
-    if skill_name_to_validate and kernel:
+    # First, validate the skill's/file's syntax
+    target_to_validate = params.get("target", params.get("skill_name"))
+    if target_to_validate and kernel:
         if 'forge_validate' in kernel.registry:
             validation_result = kernel.registry['forge_validate'](
-                {"skill_name": skill_name_to_validate}, kernel
+                {"target": target_to_validate}, kernel
             )
             if validation_result.get("status") != "ok":
                 return {
@@ -21,12 +21,12 @@ def evolve_propose(params: dict, kernel=None) -> dict:
             # forge_validate not loaded yet — skip validation gracefully
             pass
             
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     prop_id = f"prop-{uuid.uuid4().hex[:8]}"
 
     proposal = {
         "id": prop_id,
-        "skill_name": params.get("skill_name", ""),
+        "target": target_to_validate,
         "snapshot_id": params.get("snapshot_id", ""),
         "description": params.get("description", ""),
         "target_file": params.get("target_file", ""),

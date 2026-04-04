@@ -2,14 +2,10 @@
 import os, json
 def context_load(params: dict, kernel=None) -> dict:
     """Load fresh context at cycle start: identity, scores, hypothesis, recent experiences."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     manifest = {}
 
-    # Load identity
-    id_file = os.path.join(boros_dir, "skills", "identity", "state", "identity.json")
-    if os.path.exists(id_file):
-        with open(id_file) as f:
-            manifest["identity"] = json.load(f)
+
 
     # Load recent scores
     score_file = os.path.join(boros_dir, "memory", "score_history.jsonl")

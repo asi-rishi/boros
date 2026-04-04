@@ -1,7 +1,7 @@
 
 import os, json, datetime
 def loop_end_cycle(params: dict, kernel=None) -> dict:
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     
     state_file = os.path.join(boros_dir, "session", "loop_state.json")
     if os.path.exists(state_file):
@@ -17,7 +17,7 @@ def loop_end_cycle(params: dict, kernel=None) -> dict:
 
     # Clean up session artifacts (keep state files)
     session_dir = os.path.join(boros_dir, "session")
-    keep = {"loop_state.json", "current_cycle.json"}
+    keep = {"loop_state.json", "current_cycle.json", "hypothesis.json", "evolution_target.json"}
     if os.path.isdir(session_dir):
         for item in os.listdir(session_dir):
             if item not in keep and not os.path.isdir(os.path.join(session_dir, item)):

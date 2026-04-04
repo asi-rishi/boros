@@ -11,7 +11,7 @@ def generate_evaluation_artifact(content: dict, artifact_name: str, kernel=None)
     artifacts for evaluation, especially when internal functions are modified
     and their generative depth needs to be assessed.
     """
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     artifacts_dir = os.path.join(boros_dir, "eval-generator", "shared", "artifacts")
     os.makedirs(artifacts_dir, exist_ok=True)
 

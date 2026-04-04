@@ -2,10 +2,11 @@
 import os, json, uuid, datetime
 def evolve_create_skill(params: dict, kernel=None) -> dict:
     """Create a brand new skill with full directory structure."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     skill_name = params.get("skill_name", "")
     description = params.get("description", "")
     functions = params.get("functions", [])
+    schemas_json = params.get("schemas_json", "[]")
 
     if not skill_name:
         return {"status": "error", "message": "skill_name required"}
@@ -72,5 +73,33 @@ def evolve_create_skill(params: dict, kernel=None) -> dict:
         except Exception as e:
             return {"status": "partial", "message": f"Skill created + manifest updated, but hot-load failed: {e}", "path": skill_dir}
 
-    return {"status": "ok", "message": f"Skill {skill_name} created with {len(functions)} functions, manifest updated, registry loaded.", "path": skill_dir}
+    # ── UPDATE tool_schemas.py mathematically ──
+    try:
+        schema_objects = json.loads(schemas_json) if isinstance(schemas_json, str) else schemas_json
+        if schema_objects:
+            schemas_path = os.path.join(boros_dir, "tool_schemas.py")
+            with open(schemas_path, "r") as f:
+                content = f.read()
 
+            last_brace = content.rfind("}")
+            if last_brace != -1:
+                injection = f"\n    # ── Dynamic Skill: {skill_name} ──\n"
+                for s in schema_objects:
+                    name = s.get("name")
+                    injection += f'    "{name}": {json.dumps(s)},\n'
+                
+                new_content = content[:last_brace] + injection + "}\n"
+                with open(schemas_path, "w") as f:
+                    f.write(new_content)
+                
+                # Active injection into runtime namespace
+                import boros.tool_schemas
+                import importlib
+                importlib.reload(boros.tool_schemas)
+                for s in schema_objects:
+                    boros.tool_schemas.TOOL_SCHEMAS[s["name"]] = s
+
+    except Exception as e:
+        return {"status": "partial", "message": f"Skill created but failed to inject schemas into tool_schemas.py: {e}", "path": skill_dir}
+
+    return {"status": "ok", "message": f"Skill {skill_name} created with {len(functions)} functions, manifest updated, registry loaded, and schemas injected.", "path": skill_dir}

@@ -2,8 +2,8 @@
 import os, json, shutil
 def forge_rollback(params: dict, kernel=None) -> dict:
     """Rollback a skill to a previous snapshot."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
-    skill_name = params.get("skill_name", "")
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
+    skill_name = params.get("target", params.get("skill_name", ""))
     snapshot_id = params.get("snapshot_id", "")
 
     if not skill_name or not snapshot_id:

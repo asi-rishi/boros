@@ -2,7 +2,7 @@
 import os, json
 def eval_check_regression(params: dict, kernel=None) -> dict:
     """Compare current scores against high-water marks to detect regressions."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     current_scores = params.get("current_scores", {})
     threshold = params.get("threshold", 0.05)
 

@@ -2,7 +2,7 @@
 import os, json, shutil
 def evolve_rollback(params: dict, kernel=None) -> dict:
     """Rollback a skill to a previous snapshot."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     snapshot_id = params.get("snapshot_id", "")
 
     snap_dir = os.path.join(boros_dir, "snapshots", snapshot_id)

@@ -20,15 +20,9 @@ TOOL_SCHEMAS = {
     "mode_get": _s("mode_get", "Get the current operating mode (evolution, supervised, maintenance)."),
     "mode_set": _s("mode_set", "Set the operating mode.", {"mode": {"type": "string", "enum": ["evolution", "supervised", "maintenance"]}}, ["mode"]),
 
-    # ── Temporal Consciousness ──
-    "time_now": _s("time_now", "Get current UTC timestamp."),
-    "time_elapsed_since": _s("time_elapsed_since", "Calculate seconds elapsed since a given ISO timestamp.", {"timestamp": {"type": "string"}}, ["timestamp"]),
-    "time_cycle_started": _s("time_cycle_started", "Get the timestamp when the current cycle started."),
-    "time_estimate_remaining": _s("time_estimate_remaining", "Estimate remaining time in the current cycle based on config limits."),
 
-    # ── Identity ──
-    "identity_read": _s("identity_read", "Read the current Boros identity (name, purpose, capabilities, values, narrative)."),
-    "identity_update": _s("identity_update", "Update identity fields. Merges with existing identity.", {"updates": {"type": "object", "description": "Fields to merge into identity.json"}}, ["updates"]),
+
+
 
     # ── Memory ──
     "memory_page_in": _s("memory_page_in", "Load data from long-term memory into session context.", {"source": {"type": "string", "enum": ["scores", "experiences", "evolution_records", "sessions"]}, "limit": {"type": "integer", "default": 10}}, ["source"]),
@@ -52,11 +46,11 @@ TOOL_SCHEMAS = {
 
     # ── Meta-Evolution ──
     "evolve_orient": _s("evolve_orient", "Survey scores and identify the weakest skill categories. Returns orientation data for targeting."),
-    "evolve_set_target": _s("evolve_set_target", "Set the evolution target for this cycle.", {"target_skill": {"type": "string"}, "category": {"type": "string"}, "approach": {"type": "string"}}, ["target_skill", "approach"]),
-    "evolve_propose": _s("evolve_propose", "Create a formal evolution proposal with snapshot.", {"skill_name": {"type": "string"}, "snapshot_id": {"type": "string"}, "description": {"type": "string", "description": "What the proposed change does"}, "target_file": {"type": "string", "description": "File path being modified"}, "diff_summary": {"type": "string", "description": "Summary of the code changes"}}, ["skill_name", "snapshot_id", "description", "target_file"]),
+    "evolve_set_target": _s("evolve_set_target", "Set the evolution target for this cycle.", {"target": {"type": "string", "description": "Skill name or file path"}, "category": {"type": "string"}, "approach": {"type": "string"}}, ["target", "approach"]),
+    "evolve_propose": _s("evolve_propose", "Create a formal evolution proposal with snapshot.", {"target": {"type": "string", "description": "Skill name or file path modified"}, "snapshot_id": {"type": "string"}, "description": {"type": "string", "description": "What the proposed change does"}, "target_file": {"type": "string", "description": "File path being modified"}, "diff_summary": {"type": "string", "description": "Summary of the code changes"}}, ["target", "snapshot_id", "description", "target_file"]),
     "evolve_apply": _s("evolve_apply", "Commit an approved proposal to the evolution records.", {"proposal_id": {"type": "string"}}, ["proposal_id"]),
     "evolve_rollback": _s("evolve_rollback", "Rollback to a previous snapshot.", {"snapshot_id": {"type": "string"}}, ["snapshot_id"]),
-    "evolve_create_skill": _s("evolve_create_skill", "Create a brand new skill with directory structure and manifest entry.", {"skill_name": {"type": "string"}, "description": {"type": "string"}, "functions": {"type": "array", "items": {"type": "string"}}}, ["skill_name", "description", "functions"]),
+    "evolve_create_skill": _s("evolve_create_skill", "Create a brand new skill with directory structure, manifest entry, and inject its tool schemas.", {"skill_name": {"type": "string"}, "description": {"type": "string"}, "functions": {"type": "array", "items": {"type": "string"}}, "schemas_json": {"type": "string", "description": "JSON string of array of standard tool schema dicts for the new functions. Example: '[{\"name\":\"func\",\"description\":\"...\",\"input_schema\":{...}}]'"}}, ["skill_name", "description", "functions", "schemas_json"]),
     "evolve_modify_loop": _s("evolve_modify_loop", "Propose a modification to the evolution loop stages or parameters.", {"modification": {"type": "string"}, "rationale": {"type": "string"}}, ["modification", "rationale"]),
     "evolve_history": _s("evolve_history", "Read the evolution history (past proposals, verdicts, diffs).", {"limit": {"type": "integer", "default": 10}}),
 
@@ -67,28 +61,22 @@ TOOL_SCHEMAS = {
     "review_history": _s("review_history", "Read past review decisions.", {"limit": {"type": "integer", "default": 10}}),
 
     # ── Skill Forge ──
-    "forge_snapshot": _s("forge_snapshot", "Create a restorable snapshot of a skill's current state before modification.", {"skill_name": {"type": "string"}}, ["skill_name"]),
-    "forge_validate": _s("forge_validate", "Validate a skill's Python files for syntax errors.", {"skill_name": {"type": "string"}}, ["skill_name"]),
-    "forge_test_suite": _s("forge_test_suite", "Run the test suite for a skill. Returns pass/fail and output.", {"skill_name": {"type": "string"}}, ["skill_name"]),
+    "forge_snapshot": _s("forge_snapshot", "Create a restorable snapshot of a target's current state before modification. Target can be skill name or file path.", {"target": {"type": "string"}}, ["target"]),
+    "forge_validate": _s("forge_validate", "Validate a python file or skill's Python files for syntax errors.", {"target": {"type": "string"}}, ["target"]),
+    "forge_test_suite": _s("forge_test_suite", "Run the test suite for a target. Returns pass/fail and output.", {"target": {"type": "string"}}, ["target"]),
     "forge_apply_diff": _s("forge_apply_diff", "Apply a diff to a skill's function file.", {"target_file": {"type": "string"}, "replacement_chunks": {"type": "array", "items": {"type": "object", "properties": {"target_content": {"type": "string"}, "replacement_content": {"type": "string"}}}}}, ["target_file", "replacement_chunks"]),
-    "forge_rollback": _s("forge_rollback", "Rollback a skill to a previous snapshot.", {"skill_name": {"type": "string"}, "snapshot_id": {"type": "string"}}, ["skill_name", "snapshot_id"]),
+    "forge_rollback": _s("forge_rollback", "Rollback a target to a previous snapshot.", {"target": {"type": "string"}, "snapshot_id": {"type": "string"}}, ["target", "snapshot_id"]),
     "forge_invoke": _s("forge_invoke", "Invoke a specific function from a skill for testing.", {"function_name": {"type": "string"}, "params": {"type": "object"}}, ["function_name"]),
     "forge_create_skill": _s("forge_create_skill", "Scaffold a new skill directory with standard structure.", {"skill_name": {"type": "string"}, "description": {"type": "string"}, "functions": {"type": "array", "items": {"type": "string"}}}, ["skill_name", "description", "functions"]),
 
-    # ── Mission Control ──
-    "mission_read": _s("mission_read", "Read the current task queue and active tasks."),
-    "mission_queue_task": _s("mission_queue_task", "Add a new task to the queue.", {"description": {"type": "string"}, "priority": {"type": "string", "enum": ["low", "medium", "high", "critical"]}}, ["description"]),
-    "mission_update_status": _s("mission_update_status", "Update the status of a task.", {"task_id": {"type": "string"}, "status": {"type": "string", "enum": ["queued", "active", "completed", "failed"]}}, ["task_id", "status"]),
+
 
     # ── Reasoning ──
     "reason_decompose": _s("reason_decompose", "Decompose a complex problem into sub-problems. Returns structured breakdown.", {"problem": {"type": "string"}}, ["problem"]),
     "reason_evaluate_options": _s("reason_evaluate_options", "Evaluate multiple options against criteria. Returns ranked assessment.", {"options": {"type": "array", "items": {"type": "string"}}, "criteria": {"type": "string"}}, ["options", "criteria"]),
     "reason_check_logic": _s("reason_check_logic", "Check an argument for logical consistency. Returns assessment.", {"argument": {"type": "string"}}, ["argument"]),
 
-    # ── Scratchpad ──
-    "scratchpad_write": _s("scratchpad_write", "Write a value to the scratchpad (ephemeral per-cycle key-value store).", {"key": {"type": "string"}, "value": {"type": "string"}}, ["key", "value"]),
-    "scratchpad_read": _s("scratchpad_read", "Read a value from the scratchpad.", {"key": {"type": "string"}}, ["key"]),
-    "scratchpad_clear": _s("scratchpad_clear", "Clear the scratchpad (all keys or a specific key).", {"key": {"type": "string", "description": "Optional specific key to clear"}}),
+
 
     # ── Tool Use ──
     "tool_terminal": _s("tool_terminal", "Execute a shell command. Returns stdout, stderr, returncode. Use background=true for long-running processes.", {"command": {"type": "string"}, "background": {"type": "boolean", "default": False}}, ["command"]),
@@ -96,9 +84,7 @@ TOOL_SCHEMAS = {
     "tool_terminal_kill": _s("tool_terminal_kill", "Terminate a background job.", {"job_id": {"type": "string"}}, ["job_id"]),
     "tool_file_edit_diff": _s("tool_file_edit_diff", "Apply surgical find-and-replace patches to a file. Each chunk replaces the first occurrence of target_content with replacement_content.", {"target_file": {"type": "string"}, "replacement_chunks": {"type": "array", "items": {"type": "object", "properties": {"target_content": {"type": "string"}, "replacement_content": {"type": "string"}}, "required": ["target_content", "replacement_content"]}}}, ["target_file", "replacement_chunks"]),
 
-    # ── Communication ──
-    "comm_broadcast": _s("comm_broadcast", "Broadcast a message to the director log.", {"message": {"type": "string"}, "channel": {"type": "string", "default": "general"}}, ["message"]),
-    "comm_listen": _s("comm_listen", "Check for pending director commands.", {"channel": {"type": "string", "default": "general"}}),
+
 
     # ── Web Research ──
     "research_browse": _s("research_browse", "Fetch and read content from a URL.", {"url": {"type": "string"}}, ["url"]),

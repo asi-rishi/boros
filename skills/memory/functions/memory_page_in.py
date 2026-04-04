@@ -2,7 +2,7 @@
 import os, json, glob
 def memory_page_in(params: dict, kernel=None) -> dict:
     """Load data from long-term memory into context."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     source = params.get("source", "scores")
     limit = params.get("limit", 10)
     data = []

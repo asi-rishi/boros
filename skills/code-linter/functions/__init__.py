@@ -1,1 +1,0 @@
-from .check_f_string_syntax import check_f_string_syntax

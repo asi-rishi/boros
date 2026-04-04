@@ -9,6 +9,6 @@ def validate_skill_syntax(skill_name: str, kernel=None) -> dict:
         return {"status": "error", "message": "Kernel not available for validation."}
     
     # This is the correct way to invoke another tool from within a function.
-    validation_result = kernel.registry['forge_validate']({"skill_name": skill_name})
+    validation_result = kernel.registry['forge_validate']({"target": skill_name}, kernel)
     
     return validation_result

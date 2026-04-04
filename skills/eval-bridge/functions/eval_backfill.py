@@ -2,7 +2,7 @@
 import os, json
 def eval_backfill(params: dict, kernel=None) -> dict:
     """Backfill missing scores into score_history from eval results."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     cycle = params.get("cycle", 0)
     import glob, time
 

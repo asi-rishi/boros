@@ -2,9 +2,9 @@
 import os, json, datetime
 def evolve_set_target(params: dict, kernel=None) -> dict:
     """Set the evolution target for this cycle. Writes to session."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     target = {
-        "target_skill": params.get("target_skill", ""),
+        "target_skill": params.get("target", params.get("target_skill", "")),
         "category": params.get("category", ""),
         "approach": params.get("approach", ""),
         "timestamp": datetime.datetime.utcnow().isoformat() + "Z"

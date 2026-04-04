@@ -4,7 +4,7 @@ def review_proposal(params: dict, kernel=None) -> dict:
     """Submit a proposal to the Meta-Evaluation Review Board (secondary LLM).
     If meta_eval_llm is available, calls it for independent review.
     Falls back to rule-based review if no LLM is available."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
 
     proposal_id = params.get("proposal_id", "unknown")
     diff = params.get("diff", "")
@@ -93,10 +93,10 @@ def review_proposal(params: dict, kernel=None) -> dict:
             if os.path.exists(prop_file):
                 with open(prop_file) as f:
                     proposal = json.load(f)
-                skill_name = proposal.get("skill_name")
+                target = proposal.get("target", proposal.get("skill_name"))
                 snapshot_id = proposal.get("snapshot_id")
-                if skill_name and snapshot_id and "forge_rollback" in kernel.registry:
-                    kernel.registry["forge_rollback"]({"skill_name": skill_name, "snapshot_id": snapshot_id}, kernel)
+                if target and snapshot_id and "forge_rollback" in kernel.registry:
+                    kernel.registry["forge_rollback"]({"target": target, "snapshot_id": snapshot_id}, kernel)
                     reason += " [AUTO-ROLLBACK EXECUTED]"
         except Exception as rollback_e:
             reason += f" [AUTO-ROLLBACK FAILED: {rollback_e}]"

@@ -2,7 +2,7 @@
 import os, json
 def eval_update_high_water(params: dict, kernel=None) -> dict:
     """Update high-water marks if current scores exceed them."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     scores = params.get("scores", {})
 
     hw_file = os.path.join(boros_dir, "skills", "eval-bridge", "state", "high_water_marks.json")

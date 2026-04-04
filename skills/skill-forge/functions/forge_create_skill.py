@@ -2,7 +2,7 @@
 import os, json, datetime
 def forge_create_skill(params: dict, kernel=None) -> dict:
     """Scaffold a new skill directory with standard structure."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     skill_name = params.get("skill_name", "")
     description = params.get("description", "")
     functions = params.get("functions", [])

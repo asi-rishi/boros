@@ -1,7 +1,7 @@
 
 import os, json, datetime
 def loop_start(params: dict, kernel=None) -> dict:
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     
     # Read current cycle number
     cycle_file = os.path.join(boros_dir, "session", "current_cycle.json")

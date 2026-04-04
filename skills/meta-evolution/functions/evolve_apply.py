@@ -2,7 +2,7 @@
 import os, json, datetime
 def evolve_apply(params: dict, kernel=None) -> dict:
     """Commit an approved proposal to the evolution records."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     proposal_id = params.get("proposal_id", "")
 
     # Read the proposal
@@ -27,7 +27,7 @@ def evolve_apply(params: dict, kernel=None) -> dict:
         json.dump(proposal, f, indent=2)
 
     # Trigger dynamic module reload into actual execution memory
-    skill_name = proposal.get("skill_name")
+    skill_name = proposal.get("skill_name") or proposal.get("target")
     if skill_name and kernel and hasattr(kernel, "reload_skill"):
         try:
             success = kernel.reload_skill(skill_name)

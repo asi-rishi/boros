@@ -2,7 +2,7 @@
 import os, json, uuid, datetime
 def memory_commit_archival(params: dict, kernel=None) -> dict:
     """Commit an entry to long-term archival memory."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     entry = {
         "id": f"exp-{uuid.uuid4().hex[:8]}",
         "type": params.get("entry_type", "observation"),

@@ -2,7 +2,7 @@
 import os, json, glob
 def review_history(params: dict, kernel=None) -> dict:
     """Read past review decisions."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     limit = params.get("limit", 10)
     records_dir = os.path.join(boros_dir, "memory", "evolution_records")
     reviews = []

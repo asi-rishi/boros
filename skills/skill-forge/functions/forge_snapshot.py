@@ -2,14 +2,25 @@
 import os, json, shutil, uuid, datetime
 def forge_snapshot(params: dict, kernel=None) -> dict:
     """Create a restorable snapshot of a skill's current function files."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
-    skill_name = params.get("skill_name", "")
-    if not skill_name:
-        return {"status": "error", "message": "skill_name required"}
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
+    skill_name_raw = params.get("target", params.get("skill_name", ""))
+    if not skill_name_raw:
+        return {"status": "error", "message": "target or skill_name required"}
+
+    # Extract skill directory name even if a full path is passed
+    skill_name = skill_name_raw.replace('\\', '/')
+    if "/skills/" in skill_name:
+        skill_name = skill_name.split("/skills/")[-1].split("/")[0]
+    elif skill_name.startswith("skills/"):
+        skill_name = skill_name.split("/")[1]
+    elif "/" in skill_name:
+        skill_name = skill_name.split("/")[0]
+    else:
+        skill_name = skill_name_raw
 
     func_dir = os.path.join(boros_dir, "skills", skill_name, "functions")
     if not os.path.isdir(func_dir):
-        return {"status": "error", "message": f"Skill functions not found: {func_dir}"}
+        return {"status": "error", "message": f"Skill functions not found for target {skill_name_raw}: {func_dir}"}
 
     snapshot_id = f"snap-{uuid.uuid4().hex[:8]}"
     snap_dir = os.path.join(boros_dir, "snapshots", snapshot_id)

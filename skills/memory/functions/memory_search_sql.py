@@ -2,7 +2,7 @@
 import os, json, glob
 def memory_search_sql(params: dict, kernel=None) -> dict:
     """Search memory files using keyword matching."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     query = params.get("query", "").lower()
     if not query:
         return {"status": "error", "message": "query required"}

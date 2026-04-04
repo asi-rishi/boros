@@ -26,7 +26,7 @@ boros/
 │   ├── sessions/                # Short-term rolling buffer states
 │   └── score_history.jsonl      # Chronological ledger of dual-scoring evaluations
 ├── session/                     # Volatile cycle state (`loop_state.json`, `current_cycle.json`)
-├── skills/                      # The 19 Autonomous Brain lobes
+├── skills/                      # The 15 Autonomous Brain lobes
 │   └── [skill-name]/            # e.g., `tool-use`, `memory`, `meta-evolution`
 │       ├── SKILL.md             # The semantic intent and prompt instruction of the capability
 │       ├── skill.json           # Physical skill metadata
@@ -36,9 +36,15 @@ boros/
 
 ---
 
-## 2. The 3-Stage Evolution Loop
+## 2. The Unconstrained Dual-Mode Loop
 
-Boros fundamentally compounds intelligence via a 3-stage infinite recursive loop. The `kernel.py` loads the components, but the `Loop Orchestrator` spins the timing.
+Boros operates in two foundational modes governed by `mode-controller`. The `kernel.py` loads the components, and the `Loop Orchestrator` spins the timing.
+
+### Mode: Execution 
+Boros acts as a purely functional digital employee. It continuously checks the CLI director queue (`pending.json`) or acts upon immediate tasks, using its registered `tool-use` logic.
+
+### Mode: Evolution
+Boros compounds intelligence via a 3-stage infinite recursive loop natively interacting with its world model.
 
 1. **REFLECT**: Boros reads the `context_manifest.json` (prepared dynamically by `Context Orchestration` at cycle boot). It evaluates previous historical evaluation scores, parses weakest execution categories, and natively writes a mathematical and qualitative `hypothesis.json`.
 2. **EVOLVE**: Boros takes its hypothesis, isolates a functional bottleneck mapped in `manifest.json`, and deliberately writes structural Python code inside a specific `boros/skills/**/functions/` directory or modifies a `SKILL.md` instruction block. Boros then submits this diff to the `Meta-Evaluation` Review Board (a secondary LLM pipeline), which strictly grades the execution for regressions. If it passes, it's structurally committed.
@@ -75,12 +81,12 @@ self.meta_eval_llm = load_adapter(self.config["providers"]["meta_eval_api"])
 
 ## 5. Core Skill Reference Matrix
 
-There are 19 unique Capabilities separated natively into *Boot* sequences (load sequentially verifying constraints) and *Demand* load structures (dynamically invoked as necessary to offset token burn).
+There are 15 unique Capabilities separated natively into *Boot* sequences (load sequentially verifying constraints) and *Demand* load structures (dynamically invoked as necessary to offset token burn).
 
 | Classification | Essential Skills | Description |
 | :--- | :--- | :--- |
 | **Director** | `director-interface` | The asynchronous `prompt_toolkit` Terminal UI wrapper. |
-| **Boot Core** | `identity`, `memory`, `skill-router`, `reflection` | Establishes the static personality, physical database connections, mapping tools, and cycle starting analysis blocks. |
+| **Boot Core** | `memory`, `skill-router`, `reflection`, `context-orchestration` | Establishes physical database connections, mapping tools, and cycle starting analysis blocks. |
 | **Boot Evolution** | `meta-evolution`, `meta-evaluation`, `loop-orchestrator` | Proposes raw codebase changes, rigorously audits diff regressions, and manages the state definitions (`session/`). |
 | **Demand** | `tool-use`, `skill-forge`, `web-research`, `eval-bridge` | Physical filesystem manipulation, automated PyTest safety compiling, headless browser integrations, and the bridge to the dual-scoring Eval Sandbox. |
 

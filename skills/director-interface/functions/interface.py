@@ -16,14 +16,14 @@ class DirectorInterface:
         self.pause_requested = False
 
         # Ensure directories
-        self.commands_dir = self.boros_root / "boros" / "commands"
+        self.commands_dir = self.boros_root / "commands"
         self.commands_dir.mkdir(parents=True, exist_ok=True)
         self.pending_file = self.commands_dir / "pending.json"
         if not self.pending_file.exists():
             with open(self.pending_file, "w") as f:
                 json.dump({"pending": []}, f)
 
-        self.logs_dir = self.boros_root / "boros" / "logs"
+        self.logs_dir = self.boros_root / "logs"
         self.logs_dir.mkdir(parents=True, exist_ok=True)
         self.cycles_log = self.logs_dir / "cycles.log"
         if not self.cycles_log.exists():
@@ -141,7 +141,7 @@ class DirectorInterface:
 
         cmd = text[6:].strip()
         if cmd == "status":
-            state_file = self.boros_root / "boros" / "session" / "loop_state.json"
+            state_file = self.boros_root / "session" / "loop_state.json"
             if state_file.exists():
                 state = json.loads(state_file.read_text())
                 console.print(f"[bold green]Loop State:[/bold green] {json.dumps(state, indent=2)}")

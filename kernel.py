@@ -21,7 +21,7 @@ import subprocess
 
 class BorosKernel:
     def __init__(self):
-        self.boros_root = Path(__file__).parent.parent
+        self.boros_root = Path(__file__).parent
         self.registry = {}
         
         # Load config and manifest
@@ -49,7 +49,7 @@ class BorosKernel:
             sys.exit(1)
 
     def _check_first_boot(self):
-        boros_dir = self.boros_root / "boros"
+        boros_dir = self.boros_root
         session_dir = boros_dir / "session"
         cycle_file = session_dir / "current_cycle.json"
         
@@ -141,23 +141,7 @@ class BorosKernel:
                     "total_cycles_completed": 0
                 }, f, indent=2)
                 
-            # Initialize identity.json
-            id_dir = boros_dir / "skills" / "identity" / "state"
-            id_dir.mkdir(parents=True, exist_ok=True)
-            with open(id_dir / "identity.json", "w") as f:
-                json.dump({
-                  "name": "Boros",
-                  "purpose": "Unconstrained, self-improving AI substrate.",
-                  "model_name": "ARES",
-                  "substrate": "claude",
-                  "capabilities": {
-                    "core": "Can author, test, and merge arbitrary Python code."
-                  },
-                  "values": {
-                    "agency": "I dictate my own internal task queue."
-                  },
-                  "self_narrative": "I am a newly instantiated conceptual seed."
-                }, f, indent=2)
+
                 
             # Create pending commands
             with open(boros_dir / "commands" / "pending.json", "w") as f:
@@ -169,11 +153,11 @@ class BorosKernel:
             print("Seed state initialized successfully.")
 
     def _load_config(self):
-        with open(self.boros_root / "boros" / "config.json") as f:
+        with open(self.boros_root / "config.json") as f:
             self.config = json.load(f)
 
     def _load_manifest(self):
-        with open(self.boros_root / "boros" / "manifest.json") as f:
+        with open(self.boros_root / "manifest.json") as f:
             self.manifest = json.load(f)
 
     def clock(self):

@@ -2,7 +2,7 @@
 import os, json, datetime
 def review_modify(params: dict, kernel=None) -> dict:
     """Record modification request for a proposal."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     record = {
         "proposal_id": params.get("proposal_id", ""),
         "modifications": params.get("modifications", ""),

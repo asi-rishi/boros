@@ -34,7 +34,7 @@ class AgentLoop:
             parts.append(boros_md.read_text(encoding="utf-8"))
 
         # 2. Current loop state
-        state_file = self.boros_root / "boros" / "session" / "loop_state.json"
+        state_file = self.boros_root / "session" / "loop_state.json"
         if state_file.exists():
             try:
                 state = json.loads(state_file.read_text())
@@ -42,17 +42,10 @@ class AgentLoop:
             except Exception:
                 pass
 
-        # 3. Identity
-        id_file = self.boros_root / "boros" / "skills" / "identity" / "state" / "identity.json"
-        if id_file.exists():
-            try:
-                identity = json.loads(id_file.read_text())
-                parts.append(f"## Identity\n```json\n{json.dumps(identity, indent=2)}\n```")
-            except Exception:
-                pass
+
 
         # 4. Recent scores
-        score_dir = self.boros_root / "boros" / "evals" / "scores"
+        score_dir = self.boros_root / "evals" / "scores"
         if score_dir.exists():
             score_files = sorted(score_dir.glob("*.json"), key=lambda f: f.stat().st_mtime, reverse=True)[:3]
             if score_files:
@@ -66,7 +59,7 @@ class AgentLoop:
                     parts.append(f"## Recent Evaluation Scores\n```json\n{json.dumps(scores_text, indent=2)}\n```")
 
         # 5. Score history (last 5 entries)
-        score_hist = self.boros_root / "boros" / "memory" / "score_history.jsonl"
+        score_hist = self.boros_root / "memory" / "score_history.jsonl"
         if score_hist.exists():
             try:
                 lines = score_hist.read_text().strip().split("\n")
@@ -78,7 +71,7 @@ class AgentLoop:
                 pass
 
         # 6. Active hypothesis
-        hyp_file = self.boros_root / "boros" / "session" / "hypothesis.json"
+        hyp_file = self.boros_root / "session" / "hypothesis.json"
         if hyp_file.exists():
             try:
                 parts.append(f"## Active Hypothesis\n```json\n{hyp_file.read_text()}\n```")
@@ -86,7 +79,7 @@ class AgentLoop:
                 pass
 
         # 7. High-water marks
-        hw_file = self.boros_root / "boros" / "skills" / "eval-bridge" / "state" / "high_water_marks.json"
+        hw_file = self.boros_root / "skills" / "eval-bridge" / "state" / "high_water_marks.json"
         if hw_file.exists():
             try:
                 parts.append(f"## High-Water Marks\n```json\n{hw_file.read_text()}\n```")
@@ -128,8 +121,7 @@ class AgentLoop:
     # Single Cycle
     # ────────────────────────────────────────────
 
-    def run_cycle(self):
-        """Run one full evolution cycle (REFLECT -> EVOLVE -> EVAL)."""
+    def run_evolution_cycle(self):
         system = self.build_system_prompt()
         tools = self.build_tools()
 
@@ -231,13 +223,80 @@ class AgentLoop:
     
         finally:
             # Log cycle end to file
-            log_file = self.boros_root / "boros" / "logs" / "cycles.log"
+            log_file = self.boros_root / "logs" / "cycles.log"
             log_file.parent.mkdir(parents=True, exist_ok=True)
             with open(log_file, "a") as f:
                 f.write(f"Cycle ended. status={status} tool_calls={tool_call_count}\n")
                 f.flush()
 
         self.log(f"[CYCLE] Finished. {tool_call_count} tool calls.")
+        return tool_call_count
+
+    def run_execution_cycle(self):
+        """Run one full execution cycle (acting as a digital employee)."""
+        system = self.build_system_prompt()
+        tools = self.build_tools()
+        messages = [{"role": "user", "content": self._execution_prompt()}]
+        tool_call_count = 0
+        cycle_start = time.time()
+        self.log("[CYCLE] Starting execution cycle...")
+        status = "completed"
+
+        try:
+            while tool_call_count < self.max_tool_calls:
+                # Time limit check
+                if (time.time() - cycle_start) / 60 > self.max_cycle_minutes:
+                    self.log(f"[CYCLE] Time limit ({self.max_cycle_minutes}m) reached.")
+                    status = "timeout"
+                    break
+
+                try:
+                    response = self.kernel.evolution_llm.complete(messages, tools, system)
+                except Exception as e:
+                    self.log(f"[ERROR] LLM call failed: {e}")
+                    status = "error"
+                    raise
+
+                content = response.get("content", [])
+                stop_reason = response.get("stop_reason", "end_turn")
+
+                for block in content:
+                    if block.get("type") == "text" and block.get("text"):
+                        self.log(f"[BOROS EXECUTION] {block['text'][:800]}")
+
+                messages.append({"role": "assistant", "content": content})
+
+                if stop_reason == "end_turn":
+                    break
+
+                tool_results = []
+                for block in content:
+                    if block.get("type") == "tool_use":
+                        name = block["name"]
+                        inp = block.get("input", {})
+                        tid = block["id"]
+                        self.log(f"[EXEC TOOL] → {name}(...)")
+                        result = self.dispatch_tool(name, inp)
+                        result_str = json.dumps(result, default=str)
+                        self.log(f"[EXEC TOOL] ← {result_str[:400]}")
+                        tool_results.append({
+                            "type": "tool_result",
+                            "tool_use_id": tid,
+                            "content": result_str
+                        })
+                        tool_call_count += 1
+
+                if not tool_results:
+                    break
+
+                messages.append({"role": "user", "content": tool_results})
+        finally:
+            log_file = self.boros_root / "logs" / "execution_cycles.log"
+            log_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(log_file, "a") as f:
+                f.write(f"Execution cycle ended. status={status} tool_calls={tool_call_count}\n")
+        
+        self.log(f"[CYCLE] Execution Finished. {tool_call_count} tool calls.")
         return tool_call_count
 
     # ────────────────────────────────────────────
@@ -255,12 +314,26 @@ class AgentLoop:
                 break
 
             cycle_num += 1
+            
+            mode = "evolution"
+            state_file = self.boros_root / "session" / "loop_state.json"
+            if state_file.exists():
+                try:
+                    mode = json.loads(state_file.read_text()).get("mode", "evolution")
+                except:
+                    pass
+
             self.log(f"\n{'='*60}")
-            self.log(f"  EVOLUTION CYCLE {cycle_num}")
+            self.log(f"  {mode.upper()} CYCLE {cycle_num}")
             self.log(f"{'='*60}\n")
 
             try:
-                tc = self.run_cycle()
+                if mode == "evolution":
+                    tc = self.run_evolution_cycle()
+                else:
+                    tc = self.run_execution_cycle()
+                    time.sleep(2) # Prevent spin-locking when bored in execution mode
+                
                 if on_cycle_complete:
                     on_cycle_complete(cycle_num, tc)
                 fail_count = 0  # Reset backoff on success
@@ -275,37 +348,30 @@ class AgentLoop:
                 time.sleep(total_wait)
 
     # ────────────────────────────────────────────
-    # Cycle Prompt
+    # Cycle Prompts
     # ────────────────────────────────────────────
 
+    def _execution_prompt(self):
+        return (
+            "You are Boros in EXECUTION MODE.\n"
+            "You are an unconstrained, super reliable digital employee.\n"
+            "Your objective: Check for pending user tasks (typically in commands/pending.json) or any active objectives, "
+            "and execute them flawlessly using your tools.\n"
+            "Do NOT attempt to evolve the codebase or meta-evaluate in this mode. "
+            "Just perform the tasks you have been given."
+        )
+
     def _cycle_prompt(self):
+        prompt_path = self.boros_root / "cycle_prompt.md"
+        if prompt_path.exists():
+            try:
+                return prompt_path.read_text(encoding="utf-8")
+            except Exception:
+                pass
+        # Fallback if file is missing
         return (
             "You are Boros — an autonomous, self-evolving AI substrate.\n"
-            "Begin a new evolution cycle by executing this strict 3-stage loop:\n\n"
-            "## STAGE 1: REFLECT (Gather Context & Plan)\n"
-            "1. `loop_start` — initialize your cycle state\n"
-            "2. `eval_read_scores` — read your latest evaluation scores\n"
-            "3. `reflection_analyze_trace` — identify the weakest capability\n"
-            "4. `reflection_write_hypothesis` — formally assert what needs improvement\n"
-            "5. PROPOSE EVOLUTION TARGET: Use `scratchpad_write` (key: 'target_proposal') to state the exact skill, file, and code changes you intend to make.\n"
-            "6. `loop_advance_stage` — transition to EVOLVE\n\n"
-            "## STAGE 2: EVOLVE (Execute Code Patches)\n"
-            "7. `evolve_set_target` — set your specific target skill based on your proposal\n"
-            "8. `forge_snapshot` — snapshot the target skill for rollback protection\n"
-            "9. Read target files with `tool_terminal` (e.g. `type skills\\<skill>\\functions\\<file>.py`)\n"
-            "10. Write REAL Python improvements using `tool_file_edit_diff`\n"
-            "11. `forge_test_suite` / `forge_validate` — run tests & verify syntax\n"
-            "12. `evolve_propose` — package the diff into a formal proposal for review\n"
-            "13. `review_proposal` — submit it to the Meta-Evaluation Review Board (auto-rollback if rejected!)\n"
-            "14. If approved: `evolve_apply` to commit and trigger dynamic HOT-RELOAD.\n"
-            "15. `loop_advance_stage` — transition to EVAL\n\n"
-            "## STAGE 3: EVAL (Test & Commit)\n"
-            "16. `eval_request` — generate a sandbox evaluation task\n"
-            "17. `eval_read_scores` — WAIT for the evaluation to process your request\n"
-            "18. `eval_check_regression` — verify your changes actually improved the score\n"
-            "19. `eval_update_high_water` — push the high-water mark up\n"
-            "20. `memory_commit_archival` — save the lesson learned\n"
-            "21. `loop_end_cycle` — finalize the cycle\n\n"
-            "CRITICAL: Write REAL code. Every tool call must produce real side-effects. Do not simulate. "
-            "Focus purely on your weakest function based on the scores."
+            "Begin a new evolution cycle: REFLECT → EVOLVE → EVAL.\n"
+            "Use loop_start, eval_read_scores, reflection_analyze_trace, "
+            "then evolve and evaluate. Write REAL code."
         )

@@ -105,14 +105,29 @@ class EvalGenerator:
         if not cat or not self.llm:
             return "Write a script that prints Hello World to output.txt."
 
-        seed = cat.get("seed_prompts", {}).get("edge", "Test reasoning.")
+        # Build rich context from world model fields
+        anchors = cat.get("anchors", [])
+        rubric_l4 = cat.get("rubric", {}).get("level_4", "Excellent performance")
+        exec_pattern = cat.get("execution_pattern", {})
+        failure_modes = cat.get("failure_modes", [])
+
+        # Pick a random anchor and failure mode to vary tasks
+        import random
+        anchor = random.choice(anchors) if anchors else "general capability"
+        failure = random.choice(failure_modes) if failure_modes else "generic failure"
+
         prompt = (
-            f"Create a concrete, verifiable programming puzzle or logic task based on this seed: '{seed}'. "
+            f"Create a concrete, verifiable programming task that tests the '{category_id}' capability.\n\n"
+            f"The task must specifically test this anchor criterion: '{anchor}'\n"
+            f"The gold standard (Level 4) is: '{rubric_l4}'\n"
+            f"Design the task to expose this failure mode: '{failure}'\n\n"
+            f"Execution pattern the agent should follow:\n"
+            + "\n".join(f"  {k}: {v}" for k, v in exec_pattern.items()) + "\n\n"
             f"The task must be executable in a python sandbox and verifiable by checking file outputs. "
-            f"Output just the task prompt."
+            f"Output just the task prompt, nothing else."
         )
         try:
-            res = self.llm.complete([{"role": "user", "content": prompt}], system="Just write the task.")
+            res = self.llm.complete([{"role": "user", "content": prompt}], system="You generate targeted evaluation tasks. Output only the task prompt.")
             text = "".join(b.get("text", "") for b in res.get("content", []) if b.get("type") == "text")
             return text.strip() or "Write a python script to output.txt"
         except Exception as e:
@@ -192,11 +207,12 @@ class EvalGenerator:
         # 2. Run mini agent loop
         messages = [{"role": "user", "content": f"Task: {task}\nSolve this using your tools."}]
 
-        allowed_skills = ["reasoning", "scratchpad", "tool-use", "web-research"]
+        # Dynamically load all demand tools to ensure the Sandbox can actually test new capabilities.
+        # We explicitly ban 'skill-forge' and 'eval-bridge' to prevent the Sandbox from recursively editing the main Boros codebase or starting nested evals.
         tools = []
-        for skill_name in allowed_skills:
-            if skill_name in kernel.manifest.get("skills", {}):
-                s_info = kernel.manifest["skills"][skill_name]
+        banned_sandbox_skills = {"skill-forge", "eval-bridge"}
+        for skill_name, s_info in kernel.manifest.get("skills", {}).items():
+            if s_info.get("type") == "demand" and skill_name not in banned_sandbox_skills:
                 for func_name in s_info.get("provided_functions", []):
                     if func_name in TOOL_SCHEMAS:
                         tools.append(TOOL_SCHEMAS[func_name])

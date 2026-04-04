@@ -2,7 +2,7 @@
 import os, json, uuid, datetime
 def reflection_write_hypothesis(params: dict, kernel=None) -> dict:
     """Write an improvement hypothesis for this cycle."""
-    boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
+    boros_dir = str(kernel.boros_root) if kernel else "boros"
     hyp_id = f"hyp-{uuid.uuid4().hex[:8]}"
     hyp = {
         "id": hyp_id,
