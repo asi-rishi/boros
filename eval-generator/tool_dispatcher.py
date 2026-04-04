@@ -32,19 +32,26 @@ class ToolDispatcher:
             # ───────────────────────────────────────────────
             if tool_name == "tool_terminal":
                 command = kwargs.get("command", "")
-                result = subprocess.run(
-                    command,
-                    shell=True,
-                    cwd=self.sandbox_path,
-                    capture_output=True,
-                    text=True
-                )
-                return {
-                    "status": "ok",
-                    "stdout": result.stdout,
-                    "stderr": result.stderr,
-                    "returncode": result.returncode
-                }
+                try:
+                    result = subprocess.run(
+                        command,
+                        shell=True,
+                        cwd=self.sandbox_path,
+                        capture_output=True,
+                        text=True,
+                        timeout=30
+                    )
+                    return {
+                        "status": "ok",
+                        "stdout": result.stdout,
+                        "stderr": result.stderr,
+                        "returncode": result.returncode
+                    }
+                except subprocess.TimeoutExpired:
+                    return {
+                        "status": "error",
+                        "error": "Command timed out after 30 seconds"
+                    }
                 
             elif tool_name == "tool_file_edit_diff":
                 target_file = kwargs.get("target_file", "")

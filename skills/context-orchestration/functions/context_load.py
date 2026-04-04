@@ -5,7 +5,29 @@ def context_load(params: dict, kernel=None) -> dict:
     boros_dir = str(kernel.boros_root) if kernel else "boros"
     manifest = {}
 
+    # Load recent evolution records (last 5)
+    evolution_records_dir = os.path.join(boros_dir, "memory", "evolution_records")
+    manifest["evolution_records"] = []
+    if os.path.exists(evolution_records_dir):
+        record_files = sorted([f for f in os.listdir(evolution_records_dir) if f.endswith(".json")], key=lambda x: os.path.getmtime(os.path.join(evolution_records_dir, x)))
+        for record_file in record_files[-5:]:
+            try:
+                with open(os.path.join(evolution_records_dir, record_file)) as f:
+                    manifest["evolution_records"].append(json.load(f))
+            except json.JSONDecodeError as e:
+                print(f"Warning: Could not parse evolution record {record_file}: {e}")
 
+    # Load recent experiences (last 5)
+    experiences_file = os.path.join(boros_dir, "memory", "experiences", "experiences.jsonl")
+    manifest["recent_experiences"] = []
+    if os.path.exists(experiences_file):
+        with open(experiences_file) as f:
+            lines = [l.strip() for l in f.readlines() if l.strip()]
+        for l in lines[-5:]:
+            try:
+                manifest["recent_experiences"].append(json.loads(l))
+            except json.JSONDecodeError as e:
+                print(f"Warning: Could not parse experience line: {l} - {e}")
 
     # Load recent scores
     score_file = os.path.join(boros_dir, "memory", "score_history.jsonl")

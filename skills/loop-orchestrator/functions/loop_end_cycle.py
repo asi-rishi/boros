@@ -15,6 +15,22 @@ def loop_end_cycle(params: dict, kernel=None) -> dict:
     else:
         cycle = 0
 
+    # Auto-update high-water marks from latest scores
+    hw_updated = {}
+    score_hist = os.path.join(boros_dir, "memory", "score_history.jsonl")
+    if os.path.exists(score_hist):
+        try:
+            with open(score_hist, "r") as f:
+                lines = [ln for ln in f if ln.strip()]
+            if lines:
+                latest = json.loads(lines[-1])
+                latest_scores = latest.get("scores", {})
+                if latest_scores and kernel and "eval_update_high_water" in kernel.registry:
+                    result = kernel.registry["eval_update_high_water"]({"scores": latest_scores}, kernel)
+                    hw_updated = result.get("updated_categories", {})
+        except Exception:
+            pass
+
     # Clean up session artifacts (keep state files)
     session_dir = os.path.join(boros_dir, "session")
     keep = {"loop_state.json", "current_cycle.json", "hypothesis.json", "evolution_target.json"}
@@ -31,4 +47,4 @@ def loop_end_cycle(params: dict, kernel=None) -> dict:
     with open(log_file, "a") as f:
         f.write(f"Cycle {cycle} ended at {datetime.datetime.utcnow().isoformat()}Z\n")
 
-    return {"status": "ok", "cycle": cycle, "message": f"Cycle {cycle} complete."}
+    return {"status": "ok", "cycle": cycle, "message": f"Cycle {cycle} complete.", "high_water_updated": hw_updated}

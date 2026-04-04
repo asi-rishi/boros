@@ -91,44 +91,7 @@ class BorosKernel:
             hw_dir.mkdir(parents=True, exist_ok=True)
             with open(hw_dir / "high_water_marks.json", "w") as f:
                 json.dump(high_water, f, indent=2)
-            
-        else:
-            # Repair existing broken state if categories.json is empty
-            cats_path = boros_dir / "evals" / "categories.json"
-            if cats_path.exists():
-                try:
-                    with open(cats_path) as f:
-                        cats = json.load(f)
-                    if not cats:
-                        # Broken state detected, repair it
-                        wm_path = boros_dir / "world_model.json"
-                        if wm_path.exists():
-                            with open(wm_path) as f:
-                                wm = json.load(f)
-                            categories = {cid: {"name": cd.get("name", cid), "description": cd.get("description", "")} for cid, cd in wm.get("categories", {}).items()}
-                            with open(cats_path, "w") as f:
-                                json.dump(categories, f, indent=2)
-                            
-                            # Also completely repair high_water marks
-                            hw_dir = boros_dir / "skills" / "eval-bridge" / "state"
-                            hw_path = hw_dir / "high_water_marks.json"
-                            hw_dir.mkdir(parents=True, exist_ok=True)
-                            
-                            existing_hw = {}
-                            if hw_path.exists():
-                                with open(hw_path) as f:
-                                    existing_hw = json.load(f)
-                            
-                            for cat in categories.keys():
-                                if cat not in existing_hw:
-                                    existing_hw[cat] = 0.0
-                            
-                            with open(hw_path, "w") as f:
-                                json.dump(existing_hw, f, indent=2)
-                            print("[Kernel] Repaired broken categories.json state.")
-                except Exception:
-                    pass
-                
+
             # Initialize loop_state.json
             loop_state_dir = boros_dir / "skills" / "loop-orchestrator" / "state"
             loop_state_dir.mkdir(parents=True, exist_ok=True)
@@ -140,9 +103,7 @@ class BorosKernel:
                     "cycle_started_at": None,
                     "total_cycles_completed": 0
                 }, f, indent=2)
-                
 
-                
             # Create pending commands
             with open(boros_dir / "commands" / "pending.json", "w") as f:
                 json.dump({"pending": []}, f)
@@ -152,9 +113,90 @@ class BorosKernel:
                 json.dump({"cycle": 0}, f)
             print("Seed state initialized successfully.")
 
+        # ── Always sync world model → categories.json and high_water_marks.json ──
+        self._sync_world_model_state(boros_dir)
+
     def _load_config(self):
         with open(self.boros_root / "config.json") as f:
             self.config = json.load(f)
+
+    def _sync_world_model_state(self, boros_dir):
+        """Sync categories.json and high_water_marks.json with current world_model.json.
+        Runs on every boot to ensure new categories are always picked up."""
+        wm_path = boros_dir / "world_model.json"
+        if not wm_path.exists():
+            return
+
+        try:
+            with open(wm_path) as f:
+                wm = json.load(f)
+            wm_categories = wm.get("categories", {})
+            if not wm_categories:
+                return
+
+            # Sync categories.json
+            cats_path = boros_dir / "evals" / "categories.json"
+            cats_path.parent.mkdir(parents=True, exist_ok=True)
+            categories = {}
+            if cats_path.exists():
+                try:
+                    with open(cats_path) as f:
+                        categories = json.load(f)
+                except Exception:
+                    categories = {}
+
+            changed = False
+            for cat_id, cat_data in wm_categories.items():
+                if cat_id not in categories:
+                    categories[cat_id] = {
+                        "name": cat_data.get("name", cat_id.replace("_", " ").title()),
+                        "description": cat_data.get("description", "")
+                    }
+                    changed = True
+
+            # Remove categories no longer in world model
+            for cat_id in list(categories.keys()):
+                if cat_id not in wm_categories:
+                    del categories[cat_id]
+                    changed = True
+
+            if changed:
+                with open(cats_path, "w") as f:
+                    json.dump(categories, f, indent=2)
+                print(f"[Kernel] Synced categories.json with world_model.json ({len(categories)} categories)")
+
+            # Sync high_water_marks.json
+            hw_dir = boros_dir / "skills" / "eval-bridge" / "state"
+            hw_dir.mkdir(parents=True, exist_ok=True)
+            hw_path = hw_dir / "high_water_marks.json"
+
+            high_water = {}
+            if hw_path.exists():
+                try:
+                    with open(hw_path) as f:
+                        high_water = json.load(f)
+                except Exception:
+                    high_water = {}
+
+            hw_changed = False
+            for cat_id in wm_categories:
+                if cat_id not in high_water:
+                    high_water[cat_id] = 0.0
+                    hw_changed = True
+
+            # Remove stale categories
+            for cat_id in list(high_water.keys()):
+                if cat_id not in wm_categories:
+                    del high_water[cat_id]
+                    hw_changed = True
+
+            if hw_changed:
+                with open(hw_path, "w") as f:
+                    json.dump(high_water, f, indent=2)
+                print(f"[Kernel] Synced high_water_marks.json with world_model.json")
+
+        except Exception as e:
+            print(f"[Kernel] Warning: World model sync failed: {e}")
 
     def _load_manifest(self):
         with open(self.boros_root / "manifest.json") as f:

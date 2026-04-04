@@ -273,8 +273,19 @@ class EvalGenerator:
     # ─────────────────────────────────────────────────────────
     # Full request processing
     # ─────────────────────────────────────────────────────────
+    def _reload_world_model(self):
+        """Re-read world_model.json from disk to pick up live changes."""
+        try:
+            with open(self.world_model_path) as f:
+                self.world_model = json.load(f)
+        except Exception as e:
+            _log(f"Failed to reload world_model.json: {e}", "WARN")
+
     def _process_request(self, req_path):
         try:
+            # Hot-reload world model on every request so new categories are picked up
+            self._reload_world_model()
+
             with open(req_path, "r") as f:
                 req = json.load(f)
 
