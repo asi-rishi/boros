@@ -62,9 +62,7 @@
       },
       "weight": 2.0,
       "related_skills": [
-        "memory",
-        "context-orchestration",
-        "reflection"
+        "memory"
       ]
     }
   }

@@ -101,11 +101,11 @@ class AgentLoop:
             except Exception:
                 pass
 
-        # 6. Active hypothesis
+        # 6. Active hypothesis (Task Binding)
         hyp_file = self.boros_root / "session" / "hypothesis.json"
         if hyp_file.exists():
             try:
-                parts.append(f"## Active Hypothesis\n```json\n{hyp_file.read_text()}\n```")
+                parts.append(f"## Active Task Binding\nYou must operate strictly on this task until completed.\n```json\n{hyp_file.read_text()}\n```")
             except Exception:
                 pass
 
@@ -187,6 +187,7 @@ class AgentLoop:
 
         self.log("[CYCLE] Starting evolution cycle...")
         status = "completed"
+        empty_turns = 0
 
         try:
             while tool_call_count < self.max_tool_calls:
@@ -271,8 +272,19 @@ class AgentLoop:
                         tool_call_count += 1
     
                 if not tool_results:
-                    self.log("[CYCLE] No tool calls found. Ending.")
-                    break
+                    empty_turns += 1
+                    if empty_turns >= 3:
+                        self.log("[CYCLE] No tool calls despite warnings. Ending.")
+                        break
+                    else:
+                        self.log(f"[CYCLE] Enforcing action (warning {empty_turns}/3)")
+                        messages.append({
+                            "role": "user",
+                            "content": "SYSTEM NOTIFICATION: No tool calls detected. You MUST execute at least one tool per cycle to advance the active task. Empty cycles are not permitted."
+                        })
+                        continue
+                else:
+                    empty_turns = 0
     
                 messages.append({"role": "user", "content": tool_results})
     
@@ -296,6 +308,7 @@ class AgentLoop:
         cycle_start = time.time()
         self.log("[CYCLE] Starting execution cycle...")
         status = "completed"
+        empty_turns = 0
 
         try:
             while tool_call_count < self.max_tool_calls:
@@ -342,7 +355,19 @@ class AgentLoop:
                         tool_call_count += 1
 
                 if not tool_results:
-                    break
+                    empty_turns += 1
+                    if empty_turns >= 3:
+                        self.log("[CYCLE] No tool calls despite warnings. Ending.")
+                        break
+                    else:
+                        self.log(f"[CYCLE] Enforcing action (warning {empty_turns}/3)")
+                        messages.append({
+                            "role": "user",
+                            "content": "SYSTEM NOTIFICATION: No tool calls detected. You MUST execute at least one tool per cycle to advance the active task. Empty cycles are not permitted."
+                        })
+                        continue
+                else:
+                    empty_turns = 0
 
                 messages.append({"role": "user", "content": tool_results})
         finally:

@@ -112,7 +112,7 @@ class ToolDispatcher:
             # ───────────────────────────────────────────────
             elif tool_name in self.kernel.registry:
                 # Security: Block state-mutating core skills from being invoked inside sandbox
-                blocked_prefixes = ("memory_", "identity_", "loop_", "evolve_", "eval_", "forge_", "mission_", "comm_", "router_", "context_", "reflection_")
+                blocked_prefixes = ("identity_", "loop_", "evolve_", "eval_", "forge_", "mission_", "comm_", "router_")
                 if any(tool_name.startswith(p) for p in blocked_prefixes):
                     return {"status": "error", "error": f"Tool {tool_name} is prohibited in sandbox."}
                 return self.kernel.registry[tool_name](kwargs, self.kernel)

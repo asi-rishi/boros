@@ -205,6 +205,10 @@ class EvalGenerator:
         dispatcher = ToolDispatcher(workspace_dir, kernel)
 
         # 2. Run mini agent loop
+        from boros.agent_loop import AgentLoop
+        sandbox_loop = AgentLoop(kernel, log_callback=lambda m: None)
+        system_prompt = sandbox_loop._execution_prompt() + "\n\n" + sandbox_loop.build_system_prompt()
+        
         messages = [{"role": "user", "content": f"Task: {task}\nSolve this using your tools."}]
 
         # Dynamically load all demand tools to ensure the Sandbox can actually test new capabilities.
@@ -228,7 +232,7 @@ class EvalGenerator:
             for iteration in range(self.max_agent_iterations):
                 iter_start = time.time()
                 try:
-                    res = self.actor_llm.complete(messages, tools=tools)
+                    res = self.actor_llm.complete(messages, tools=tools, system=system_prompt)
                     content = res.get("content", [])
                     messages.append({"role": "assistant", "content": content})
 

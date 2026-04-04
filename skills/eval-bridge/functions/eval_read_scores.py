@@ -24,27 +24,24 @@ def eval_read_scores(params: dict, kernel=None) -> dict:
             f.write(json.dumps(result_data) + "\n")
 
     if eval_id:
+        # Strip prefixes to handle LLM hallucinating req- vs eval- prefixes
+        raw_id = eval_id.replace("req-", "").replace("eval-", "")
         # Read specific eval (wait up to 5 minutes)
         for attempt in range(60):
-            if eval_id.startswith("req-"):
-                for rf in glob.glob(os.path.join(results_dir, "*.json")):
-                    try:
-                        with open(rf) as f:
-                            result = json.load(f)
-                            if result.get("request_id") == eval_id:
-                                _append_to_history(result)
-                                return {"status": "ok", "scores": result.get("scores", {}), "composite": result.get("composite", 0), "result": result}
-                    except Exception:
-                        pass
-            else:
-                result_file = os.path.join(results_dir, f"{eval_id}.json")
-                if os.path.exists(result_file):
-                    with open(result_file) as f:
+            for rf in glob.glob(os.path.join(results_dir, "*.json")):
+                try:
+                    with open(rf) as f:
                         result = json.load(f)
-                    _append_to_history(result)
-                    return {"status": "ok", "scores": result.get("scores", {}), "composite": result.get("composite", 0), "result": result}
+                        req_raw = result.get("request_id", "").replace("req-", "").replace("eval-", "")
+                        ev_raw = result.get("eval_id", "").replace("req-", "").replace("eval-", "")
+                        if raw_id == req_raw or raw_id == ev_raw:
+                            _append_to_history(result)
+                            return {"status": "ok", "scores": result.get("scores", {}), "composite": result.get("composite", 0), "result": result}
+                except Exception:
+                    pass
             time.sleep(5)
         return {"status": "error", "message": f"Timeout waiting for evaluation results for {eval_id}"}
+
 
     # Read latest results (poll briefly if no results yet)
     for attempt in range(3):

@@ -86,7 +86,27 @@ def _generate_detailed_recommendation(category, score, feedback):
         f"Outcome Details: {outcome}\n\n"
     )
 
-    if category == "reasoning_architecture":
+    if category == "memory_continuity":
+        if "fatal tool errors" in reason.lower() or "failed tool call" in outcome.lower() or "tool error" in outcome.lower() or "transcript ends before task iterations" in reason.lower():
+            recommendation += (
+                "**Actionable Memory & Continuity Insights (Tool Errors Detected):**\n"
+                "- **Environment Initialization:** Ensure the necessary files and directories are created and correctly populated *before* attempting core task logic. Verify paths, permissions, and file content immediately after creation using `tool_terminal` (`type` or `dir`).\n"
+                "- **Tool Call Sequencing:** Explicitly plan the order of tool calls. If a task requires writing a file and then executing a script that reads that file, ensure the write operation completes successfully before the execute operation begins. Look for missing intermediate verification steps.\n"
+                "- **Pre-computation/Pre-analysis:** Before beginning an iterative task, perform an initial `tool_terminal` `dir` listing of the eval sandbox to understand the initial state and potential pitfalls. Use `tool_terminal` `type` to inspect any provided files. This helps prevent blind execution.\n"
+                "- **Failure Recovery Plan:** If an initial tool call fails, log the error to episodic memory (`memory_commit_archival`) and try a different approach or re-verify the environment. Do not proceed with subsequent steps if foundational tools have failed.\n"
+                "- **Verify Execution Context:** Ensure the executed script or command has the correct working directory and necessary arguments. Check if a script needs to be made executable or if specific interpreters are required.\n"
+                "- **Iterative Trace Analysis:** For multi-iteration tasks, specifically review the trace for the *first* iteration's success. Failures there often propagate. Look for evidence of file creation, modification, and successful execution of the *initial* steps within the evaluation environment.\n"
+            )
+        else:
+            recommendation += (
+                "**Memory & Continuity Insights:**\n"
+                "- **Structured Recall:** Ensure that relevant past experiences and rules are actively retrieved and applied to current decision-making. Is `memory_page_in` being called with appropriate `source` and `limit` to get necessary context?\n"
+                "- **Abstraction Refinement:** If general rules are being abstracted, are they accurate and robust enough to handle variations and edge cases? Consider how new information refines existing abstractions.\n"
+                "- **Adaptive Planning:** Does the agent's action plan dynamically adapt based on the outcomes of previous actions? Look for explicit logic that modifies the plan based on success or failure.\n"
+                "- **Avoiding Regression:** Implement checks to ensure that new actions do not inadvertently reintroduce previously solved failure modes. Leverage historical `evolution_records` and `experiences` for this.\n"
+                "- **Contextual Awareness:** Verify that the system is leveraging its current session context effectively, not just raw memory entries. Is `context_load` being used at the start of cycles to get relevant information?\n"
+            )
+    elif category == "reasoning_architecture":
         recommendation += (
             f"**Actionable Architectural Insights:**\n"
             f"- Consider reviewing the current flow of information between skills. Are there bottlenecks or inefficient data transfers?\n"
