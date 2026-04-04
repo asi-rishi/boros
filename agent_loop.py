@@ -25,7 +25,7 @@ class AgentLoop:
     # ────────────────────────────────────────────
 
     def build_system_prompt(self):
-        """Load BOROS.md + live state into the system prompt."""
+        """Load BOROS.md + live state + world model into the system prompt."""
         parts = []
 
         # 1. Primary instruction set
@@ -34,7 +34,7 @@ class AgentLoop:
             parts.append(boros_md.read_text(encoding="utf-8"))
 
         # 2. Current loop state
-        state_file = self.boros_root / "session" / "loop_state.json"
+        state_file = self.boros_root / "skills" / "loop-orchestrator" / "state" / "loop_state.json"
         if state_file.exists():
             try:
                 state = json.loads(state_file.read_text())
@@ -42,7 +42,34 @@ class AgentLoop:
             except Exception:
                 pass
 
-
+        # 3. Dynamic World Model Injection (re-read every cycle for automatic alignment)
+        wm_file = self.boros_root / "world_model.json"
+        if wm_file.exists():
+            try:
+                wm = json.loads(wm_file.read_text())
+                categories = wm.get("categories", {})
+                if categories:
+                    wm_lines = ["## World Model Categories (Your Evolution Targets)"]
+                    wm_lines.append("These are the capabilities you MUST evolve toward. Every evolution cycle must target one of these.\n")
+                    for cat_id, cat_data in categories.items():
+                        name = cat_data.get("name", cat_id)
+                        desc = cat_data.get("description", "")
+                        related = cat_data.get("related_skills", [])
+                        anchors = cat_data.get("anchors", [])
+                        weight = cat_data.get("weight", 1.0)
+                        wm_lines.append(f"### {name} (`{cat_id}`, weight={weight})")
+                        wm_lines.append(f"{desc}\n")
+                        if related:
+                            wm_lines.append(f"**Related skills to evolve**: {', '.join(related)}")
+                        if anchors:
+                            wm_lines.append(f"**Anchors**: {'; '.join(anchors[:3])}")
+                        rubric = cat_data.get("rubric", {})
+                        if rubric.get("level_4"):
+                            wm_lines.append(f"**Level 4 Target**: {rubric['level_4']}")
+                        wm_lines.append("")
+                    parts.append("\n".join(wm_lines))
+            except Exception:
+                pass
 
         # 4. Recent scores
         score_dir = self.boros_root / "evals" / "scores"
@@ -60,13 +87,17 @@ class AgentLoop:
 
         # 5. Score history (last 5 entries)
         score_hist = self.boros_root / "memory" / "score_history.jsonl"
+        has_scores = False
         if score_hist.exists():
             try:
-                lines = score_hist.read_text().strip().split("\n")
-                recent = lines[-5:] if len(lines) > 5 else lines
-                entries = [json.loads(l) for l in recent if l.strip()]
-                if entries:
-                    parts.append(f"## Score History (last {len(entries)} entries)\n```json\n{json.dumps(entries, indent=2)}\n```")
+                raw = score_hist.read_text().strip()
+                if raw:
+                    has_scores = True
+                    lines = raw.split("\n")
+                    recent = lines[-5:] if len(lines) > 5 else lines
+                    entries = [json.loads(l) for l in recent if l.strip()]
+                    if entries:
+                        parts.append(f"## Score History (last {len(entries)} entries)\n```json\n{json.dumps(entries, indent=2)}\n```")
             except Exception:
                 pass
 
@@ -85,6 +116,30 @@ class AgentLoop:
                 parts.append(f"## High-Water Marks\n```json\n{hw_file.read_text()}\n```")
             except Exception:
                 pass
+
+        # 8. Bootstrap mode — if no scores exist, force immediate eval
+        if not has_scores:
+            parts.append(
+                "## ⚡ BOOTSTRAP MODE — CRITICAL INSTRUCTION\n"
+                "You have ZERO evaluation scores. The evolution loop cannot target improvements without data.\n\n"
+                "**You MUST follow this exact sequence:**\n"
+                "1. `loop_start` → initialize cycle\n"
+                "2. `eval_request` → submit evaluation for ALL world model categories (pass cycle number)\n"
+                "3. `eval_read_scores` → pass the `request_id` from step 2 to get results (this will wait)\n"
+                "4. `loop_end_cycle` → finalize\n\n"
+                "**DO NOT attempt to evolve code until you have baseline scores.**\n"
+                "**DO NOT target eval-bridge. DO NOT write hypotheses. Just get scores first.**"
+            )
+
+        # 9. Environment reminder
+        parts.append(
+            "## Environment\n"
+            "- OS: Windows. Use `dir` and `type` commands, NOT `ls` or `cat`.\n"
+            "- CWD: The boros root directory. Paths are relative to here.\n"
+            "- Example: `type skills\\memory\\functions\\memory_page_in.py`\n"
+            "- Do NOT prefix paths with `boros/` — you are already inside boros.\n"
+            "- Use backslashes for Windows paths in terminal commands."
+        )
 
         return "\n\n---\n\n".join(parts)
 

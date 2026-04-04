@@ -1,0 +1,6 @@
+{
+  "memory_continuity": {
+    "name": "Memory & Continuity",
+    "description": "Boros maintains persistent internal state across iterations, allowing it to accumulate knowledge, track past actions, and ensure that future behavior is consistent with prior context. Memory is structured, selective, and actively used in decision-making rather than passively stored."
+  }
+}

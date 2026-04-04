@@ -5,37 +5,44 @@ Begin a new evolution cycle by executing this strict 3-stage loop:
 1. `loop_start` — initialize your cycle state
 2. `eval_read_scores` — read your latest evaluation scores
 3. `reflection_analyze_trace` — identify the weakest capability
-4. `reflection_write_hypothesis` — formally assert what needs improvement
-5. PROPOSE EVOLUTION TARGET: Use `scratchpad_write` (key: 'target_proposal') to state the exact target (skill, core file, or script) and code changes you intend to make.
+4. `evolve_orient` — MANDATORY. Get the weakest world model category and related skill targets.
+5. `reflection_write_hypothesis` — formally assert what needs improvement. The `target_skill` MUST be from the `related_skills` returned by `evolve_orient`.
 6. `loop_advance_stage` — transition to EVOLVE
 
 ## STAGE 2: EVOLVE (Execute Code Patches)
-7. `evolve_set_target` — set your specific target based on your proposal
-8. `forge_snapshot` — snapshot the target for rollback protection
-9. Read target files with `tool_terminal` (e.g. `type <target_path>`)
-10. Write REAL Python improvements using `tool_file_edit_diff`
-11. `forge_test_suite` / `forge_validate` — run tests & verify syntax
-12. `evolve_propose` — package the diff into a formal proposal for review
-13. `review_proposal` — submit it to the Meta-Evaluation Review Board (auto-rollback if rejected!)
-14. If approved: `evolve_apply` to commit and trigger dynamic HOT-RELOAD.
-15. `loop_advance_stage` — transition to EVAL
+8. `evolve_set_target` — set target. MUST be a skill from the world model's `related_skills` for your weakest category.
+9. `forge_snapshot` — snapshot the target for rollback protection
+10. Read target files with `tool_terminal` (e.g. `type skills\\memory\\functions\\memory_page_in.py`)
+11. Write REAL Python improvements using `tool_file_edit_diff`
+12. `forge_test_suite` / `forge_validate` — run tests & verify syntax
+13. `evolve_propose` — package the diff into a formal proposal for review
+14. `review_proposal` — submit it to the Meta-Evaluation Review Board (auto-rollback if rejected!)
+15. If approved: `evolve_apply` to commit and trigger dynamic HOT-RELOAD.
+16. `loop_advance_stage` — transition to EVAL
 
 ## STAGE 3: EVAL (Test & Commit)
-16. `eval_request` — generate a sandbox evaluation task (returns request_id)
-17. `eval_read_scores` — pass the request_id from step 16 to get FRESH scores for THIS cycle
-18. `eval_check_regression` — verify your changes actually improved the score
-19. `loop_end_cycle` — finalize the cycle (high-water marks are updated automatically)
+17. `eval_request` — generate a sandbox evaluation task (returns request_id). ALWAYS pass `categories` matching your world model.
+18. `eval_read_scores` — pass the request_id from step 17 to get FRESH scores for THIS cycle. This call BLOCKS until results arrive.
+19. `eval_check_regression` — verify your changes actually improved the score
+20. `loop_end_cycle` — finalize the cycle (high-water marks are updated automatically)
 
-## TARGETING RULES
-- `evolve_orient` gives you targets ranked by their connection to your WEAKEST scoring category
-- You may also modify SKILL.md files using `tool_file_edit_diff`
-- SKILL.md files shape HOW YOU THINK — modifying them can improve cognitive capabilities directly
-- Tool code shapes WHAT YOU CAN DO — modifying it improves functional execution
-- Core files like `agent_loop.py` and `kernel.py` control your entire cognitive loop and are valid targets
-- Both are valid evolution targets. Choose based on what the eval feedback says is failing.
+## TARGETING RULES — MANDATORY
+- You MUST call `evolve_orient` before choosing a target. It reads the world model and tells you exactly which skills to target.
+- Your evolution target MUST be a skill listed in `related_skills` for your weakest world model category.
+- NEVER target `eval-bridge`, `loop-orchestrator`, `meta-evaluation`, or `mode-controller` — these are infrastructure, not capabilities.
+- Target the SKILL FUNCTION FILES (e.g., `skills/memory/functions/memory_page_in.py`) to improve WHAT YOU CAN DO.
+- Target SKILL.md files to improve HOW YOU THINK about a capability.
+- Core files like `agent_loop.py` and `kernel.py` are valid targets ONLY if eval feedback specifically indicates loop-level failures.
+
+## PATH RULES — WINDOWS ENVIRONMENT
+- Use `type` to read files, `dir` to list directories. Do NOT use `ls` or `cat`.
+- Paths are relative to the boros root. Example: `type skills\\memory\\functions\\memory_page_in.py`
+- Do NOT prefix paths with `boros/` — you are already inside the boros directory.
+- Use backslashes in terminal commands: `dir skills\\memory\\functions\\`
 
 ## CRITICAL RULES
 - Write REAL code. Every tool call must produce real side-effects. Do not simulate.
-- Focus purely on your weakest category based on the scores.
+- Focus purely on your weakest category based on the scores and world model.
 - When calling `eval_read_scores` in STAGE 3, ALWAYS pass the `eval_id` from `eval_request` to get correlated results.
 - Do NOT just change string phrasing, comments, or docstrings — the Review Board will REJECT cosmetic changes.
+- You MUST complete all 3 stages every cycle. Do NOT stop after EVOLVE.

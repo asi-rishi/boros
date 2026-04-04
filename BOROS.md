@@ -10,12 +10,17 @@ This file acts as the ultimate reference doc and System Instruction Set for any 
 
 The Boros environment is rigidly structured into isolated functional domain boundaries. If you are a freshly connected LLM attempting to interface or evolve the system, strictly adhere to these mappings:
 
+**IMPORTANT**: All paths below are relative to the boros root directory (your CWD). Do NOT prefix with `boros/`.
+On Windows: use `type` instead of `cat`, `dir` instead of `ls`, and backslashes in paths.
+Example: `type skills\memory\functions\memory_page_in.py`
+
 ```text
-boros/
+./                               # CWD = boros root (e.g., D:\x-cube\boros on Windows)
 ├── .env.template                # Global API credential configurations
 ├── config.json                  # Engine timers, logging, and fallback adapter overrides
 ├── manifest.json                # Master skill definitions, boot orders, and payload signatures
 ├── kernel.py                    # The mechanical beating heart. Auto-loads adapters and tool functions
+├── world_model.json             # THE EVOLUTION ANCHOR. Defines what Boros must become.
 ├── adapters/                    # Provider connections (Anthropic, OpenAI, etc.) via base_adapter 
 ├── commands/                    # Interactive Director UI queue -> `pending.json`
 ├── evals/                       # World Model scoring thresholds and categories
@@ -25,8 +30,8 @@ boros/
 │   ├── experiences/             # Qualitative lessons and narrative facts
 │   ├── sessions/                # Short-term rolling buffer states
 │   └── score_history.jsonl      # Chronological ledger of dual-scoring evaluations
-├── session/                     # Volatile cycle state (`loop_state.json`, `current_cycle.json`)
-├── skills/                      # The 15 Autonomous Brain lobes
+├── session/                     # Volatile cycle state (`current_cycle.json`)
+├── skills/                      # The Autonomous Brain lobes
 │   └── [skill-name]/            # e.g., `tool-use`, `memory`, `meta-evolution`
 │       ├── SKILL.md             # The semantic intent and prompt instruction of the capability
 │       ├── skill.json           # Physical skill metadata
@@ -44,11 +49,11 @@ Boros operates in two foundational modes governed by `mode-controller`. The `ker
 Boros acts as a purely functional digital employee. It continuously checks the CLI director queue (`pending.json`) or acts upon immediate tasks, using its registered `tool-use` logic.
 
 ### Mode: Evolution
-Boros compounds intelligence via a 3-stage infinite recursive loop natively interacting with its world model.
+Boros compounds intelligence via a 3-stage infinite recursive loop. The world model (`world_model.json`) defines the target capabilities. The system automatically reads the world model at each cycle start, so adding/removing categories in the world model immediately redirects evolution.
 
-1. **REFLECT**: Boros reads the `context_manifest.json` (prepared dynamically by `Context Orchestration` at cycle boot). It evaluates previous historical evaluation scores, parses weakest execution categories, and natively writes a mathematical and qualitative `hypothesis.json`.
-2. **EVOLVE**: Boros takes its hypothesis, isolates a functional bottleneck mapped in `manifest.json`, and deliberately writes structural Python code inside a specific `boros/skills/**/functions/` directory or modifies a `SKILL.md` instruction block. Boros then submits this diff to the `Meta-Evaluation` Review Board (a secondary LLM pipeline), which strictly grades the execution for regressions. If it passes, it's structurally committed.
-3. **EVAL**: The `Eval Bridge` initiates contact with the isolated `boros/eval-generator/` Sandbox. The Generator spawns complex tasks, permits Boros 20 Tool Invocation rounds within the sandbox to solve the problem, scores Boros based on literal success matrices (60% Outcome Validation / 40% LLM Quality Reasoning), and returns a Composite score back to Boros memory to conclude the cycle.
+1. **REFLECT**: Read evaluation scores, call `evolve_orient` to identify the weakest world model category, and write a hypothesis targeting the `related_skills` for that category.
+2. **EVOLVE**: Take the hypothesis, read the target skill's function files using `tool_terminal`, write real Python improvements using `tool_file_edit_diff`, submit the diff to the Meta-Evaluation Review Board, and apply if approved.
+3. **EVAL**: Call `eval_request` to generate a sandbox evaluation, then `eval_read_scores` to get fresh scores, and `eval_check_regression` to verify improvement.
 
 ---
 

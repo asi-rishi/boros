@@ -1,0 +1,6 @@
+{
+  "target_skill": "context-orchestration",
+  "category": "memory_continuity",
+  "approach": "Ensure a richer, more actionable context (including the active hypothesis and score history) is available to the agent at the start of each cycle, enabling more informed decisions and task completion.",
+  "timestamp": "2026-04-04T05:16:20.448160Z"
+}
